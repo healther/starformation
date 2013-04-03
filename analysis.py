@@ -6,7 +6,7 @@ from decimal import Decimal
 
 
 def main(folder):
-'''This script gives the number of "observed" stars from the sampled datafiles in "folder"/ 
+    '''This script gives the number of "observed" stars from the sampled datafiles in "folder"/ 
 according to the selection criteria from Yusef-Zadeh et al
 
 '''

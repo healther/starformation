@@ -7,7 +7,7 @@ import scipy.spatial
 from astropy.io import fits
 
 def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default'):
-'''Creates a sample of stars
+    '''Creates a sample of stars
 
 input:
 A_v     float   value for the visual extinction 

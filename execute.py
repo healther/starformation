@@ -7,7 +7,7 @@ import numpy as np
 
 
 def main():
-''' This script produces a grid of expected numbers of stars according to the selection 
+    ''' This script produces a grid of expected numbers of stars according to the selection 
     criteria of Yusef-Zedah et al. 2009, 702,178-225 The Astrophysical Journal.
     The grid is in av for visual extinction, apera for aperature size and age for the maxage 
     of the starformation size
