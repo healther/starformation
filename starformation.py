@@ -7,12 +7,25 @@ import scipy.spatial
 from astropy.io import fits
 
 def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default'):
-    t0 = time()
-    if appendix=='default':
-        appendix=t0
+'''Creates a sample of stars
+
+input:
+A_v     float   value for the visual extinction 
+sfr     float   Star formation rate in M_sun/year, is assumed to be constant over maxage
+apera   float   used aperature size for selecting the fluxes of the protostars
+maxage  float   age of the star formation site, sfr is assumed to be constant
+
+output:
+returns two files in the folder 'out/' the _settings file contains the used values of 
+          A_v, sfr, apera, maxage, number of sampled stars, their cumulated mass and
+          the expected mass
+'''
+    t0 = time()                 
+    if appendix=='default':             # making sure not to overwrite former output
+        appendix=t0                     # by using the starting time as an unique id
     #parameter settings
     k_v = 211.4             # opacity in v_band in cm^2/g
-          # wavelength of filtersystems in microns
+            # wavelength of the corresponding filterband in microns
     wavelength = [1.235, 1.662, 2.159, 3.550, 4.493, 5.731, 7.872, 23.68, 71.42, 155.9] 
     models = ['2H', '2J', '2K', 'I1', 'I2', 'I3', 'I4', 'M1', 'M2', 'M3']
 
@@ -40,7 +53,7 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
     g = np.vectorize(g)
     sf = dist.distribution(g, 10000., maxage)
 
-
+    # todo - change sample an expected number of stars (expmass/averagemass)
     cumass = 0.                                                     #sampled mass
     exmass = sf.cdf()(sf._upperbound)-sf.cdf()(sf._lowerbound)      #expected mass formed
     stars = []                                               #storing for the sample
@@ -56,15 +69,12 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
 #        if n % 10000 == 0:
 #            print n, cumass                                 #reporting progress
         n = n+1
-#    print 'Number of sampled stars: '                       #report finish sampleprocess
-#    print len(stars), cumass
+
 
     t2 = time()                      # sampleing completed
 
 
     # python code for model contact
-
-
     #initial parameters
     model = [ fits.open('models/%s.fits' % mod) for mod in models ]    # fits-data for the model
     param = fits.open('models/parameters.fits.gz')  # modelparameter
@@ -85,7 +95,7 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
 
     output = stars.tolist()                                 #creating output
 
-    #normalizing
+    #normalizing for nearest neighbor search
     grid[0,:] = grid[0,:]/(grid[0,:].max() - grid[0,:].min())
     grid[1,:] = grid[1,:]/(grid[1,:].max() - grid[1,:].min())
     stars[1,:] = stars[1,:]/(grid[0,:].max() - grid[0,:].min())
@@ -94,7 +104,7 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
     t3 = time()                       #model data load complete
 
     tree = scipy.spatial.cKDTree(grid,leafsize=10)                   #search tree
-    matches = [tree.query(star[1:] , k=1)[1] for star in stars]          #saves matches with (dist, index)
+    matches = [tree.query(star[1:] , k=1)[1] for star in stars]      #saves matches with (dist, index)
 
     t4 = time()                       #matching sample to data complete
 
@@ -103,7 +113,6 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
     for j in range(len(models)):
     #    fluxes[j] = [ [model[j][1].data[10*matches[i] + angle[i]][1][app_num[j]], model[j][1].data[10*matches[i] + angle[i]][2][app_num[j]] ] for i in range(len(matches)) ]
         fluxes[j] = [ model[j][1].data[10*matches[i] + angle[i]][1][app_num[j]] for i in range(len(matches)) ]
-
 
 
     # applying extinction
@@ -115,9 +124,6 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
     for j in range(len(models)):
         newfluxes[j] = np.asarray(fluxes[j]) * correctionfactor[j] 
 
-    #newfluxes = newfluxes.tolist()
-
-
 
     t5 = time()                       #extracting fluxes complete
 
@@ -127,15 +133,14 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
         for j in range(len(models)):
             output[i].append(fluxes[j][i])
             output[i].append(newfluxes[j][i])
-    #        output[i].append(fluxes[j][i][0])
-    #        output[i].append(fluxes[j][i][1])
+    #        output[i].append(fluxes[j][i][0])          possible to use if fluxerrors 
+    #        output[i].append(fluxes[j][i][1])          are necessary
     #        output[i].append(newfluxes[j][i][0])
     #        output[i].append(newfluxes[j][i][1])
 
-
+    # creating the output file
     head = ['#', 'age', 'mass', 'model']
     for mod in models:
-    #    head =  '%s, flux %s, fluxerror %s, corrected_flux %s, corrected_flux_error %s' %(head,mod,mod,mod,mod) 
         head.append('flux %s' % mod)
         head.append('corrected_flux %s' % mod)
     f = open('out/%s' % appendix, 'w')
@@ -143,6 +148,7 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
     np.savetxt(f, output)
     f.close()
 
+    # creating the settings file
     f = open('out/%s_settings' % appendix, 'w')
     settings =            '%s #visual extinction    A_v  \n' % A_v
     settings = settings + '%s #star formation rate  sfr  \n' % sfr
@@ -155,6 +161,8 @@ def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='def
     f.close()
     
     t6 = time()                       #saving complete
+
+# timing possibility for optimization efforts
 
 #    print 'starting script at %f'  %(t0)
 #    print 'initializing       %f'  %(t1-t0)

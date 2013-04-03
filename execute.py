@@ -7,8 +7,13 @@ import numpy as np
 
 
 def main():
+''' This script produces a grid of expected numbers of stars according to the selection 
+    criteria of Yusef-Zedah et al. 2009, 702,178-225 The Astrophysical Journal.
+    The grid is in av for visual extinction, apera for aperature size and age for the maxage 
+    of the starformation size
 
-        #main(A_v = 10.0, sfr = .001, apera = 24000, age = 2000000., appendix='default'):
+
+'''
     k = 0.
     parameters = []
     for av in np.linspace(5.0, 50.0, 10):
@@ -23,5 +28,6 @@ def main():
     f.write( ','.join(head)+'\n' )
     np.savetxt(f, parameters)
     f.close()
+    analysis.main('out')
 
  

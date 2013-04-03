@@ -9,7 +9,9 @@ import scipy.interpolate as interpol
 
 
 class distribution( object ):
+'''to be added
 
+'''
     def __init__(self, func = lambda x: 1, a = 0., b = 1000.):
         self._pdf = func
         self._lowerbound = a
