@@ -11,7 +11,7 @@ import sys
 
 
 
-def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default', quiet=0):
+def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default', quiet=0, precise=0):
     '''Creates a sample of stars
 
 input:
@@ -72,16 +72,24 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
     t1 = time()                     # startup completed
 
+    if precise == True:
+        while cumass < exmass:
+            mass, age = mf.sample(1)[0], sf.sample(1)[0]
+            cumass = cumass + mass
+            stars.append([n, age, mass])
+            if n % 10000 == 0:
+                print (n, cumass, file=output_stream)                                 #reporting progress
+            n = n+1
+    else:
+        n = int(exmass/.49)
+        mass, age = mf.sample(n), sf.sample(n)
+        cumass = np.sum(mass)
+        stars = [[i, age[i], mass[i]] for i in range(n)]
 
-    while cumass < exmass:
-        mass, age = mf.sample(1)[0], sf.sample(1)[0]
-        cumass = cumass + mass
-        stars.append([n, age, mass])
-        if n % 10000 == 0:
-            print (n, cumass, file=output_stream)                                 #reporting progress
-        n = n+1
     print ('number of sampled stars: %s' %n , file=output_stream)  
     print ('mass of sampled stars: %s' % cumass , file=output_stream)  
+    print ('mean mass: %s' % (cumass/n), file=output_stream)
+    print ('expected mass of stars: %s' % exmass , file=output_stream)
     t2 = time()                      # sampleing completed
 
 

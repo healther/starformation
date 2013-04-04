@@ -19,7 +19,7 @@ def main():
     for av in np.linspace(5.0, 50.0, 10):
         for apera in np.linspace(15000, 50000, 11):
             for age in np.linspace(500000, 2000000, 11):
-                starformation.main(av, .001, apera, age, "%s_%s_%s" % (av,apera,age), True)
+                starformation.main(av, .001, apera, age, "%s_%s_%s" % (av,apera,age), quiet=True)
                 print av, apera, age, k/10./11./11.
                 k = k+1
                 parameters.append([av,apera,age])
@@ -28,6 +28,6 @@ def main():
     f.write( ','.join(head)+'\n' )
     np.savetxt(f, parameters)
     f.close()
-    analysis.main('out', True)
+    analysis.main('out', quiet=True)
 
  
