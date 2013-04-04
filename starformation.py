@@ -19,6 +19,10 @@ A_v     float   value for the visual extinction
 sfr     float   Star formation rate in M_sun/year, is assumed to be constant over maxage
 apera   float   used aperature size for selecting the fluxes of the protostars
 maxage  float   age of the star formation site, sfr is assumed to be constant
+appendix String sets the outputfilename, default is the starting time (via time.time())
+quiet   boolean if true (=1) surpresses all output
+precise boolean if true (=1) sample single star till expected mass reached, else calculate
+                expected number (viaand sample as an array
 
 output:
 returns two files in the folder 'out/' the _settings file contains the used values of 
@@ -81,7 +85,7 @@ returns two files in the folder 'out/' the _settings file contains the used valu
                 print (n, cumass, file=output_stream)                                 #reporting progress
             n = n+1
     else:
-        n = int(exmass/.49)
+        n = int(exmass/ mf.mean())               
         mass, age = mf.sample(n), sf.sample(n)
         cumass = np.sum(mass)
         stars = [[i, age[i], mass[i]] for i in range(n)]

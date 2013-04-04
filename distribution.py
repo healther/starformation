@@ -18,6 +18,10 @@ class distribution( object ):
         self._upperbound = b
 	self.cdf_init(self._lowerbound, self._upperbound)
 	self._norm = self.cdf()(self._upperbound)
+      # to be further tested, but seems to be working
+        t, step = np.linspace(self._lowerbound, self._upperbound, 10000, endpoint=True, retstep=True)
+        y = [step*( self.cdf()(t[i]) + self.cdf()(t[i+1]) )/2. for i in (range(t.size - 1))]
+        self._mean = self._upperbound - sum(y)/self._norm
 
     def pdf(self):
         return self._pdf
@@ -42,4 +46,9 @@ class distribution( object ):
     def sample(self, n):
         t = np.random.uniform(0,self.norm(),n)
         return self.ppf()(t)
+
+    def mean(self):                     
+        return self._mean
+
+
 
