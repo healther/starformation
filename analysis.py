@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 from decimal import Decimal
-from __future__ import print_function
+from StringIO import StringIO
+import sys
+
 
 
 def main(folder, quiet=0):
@@ -12,9 +15,10 @@ according to the selection criteria from Yusef-Zadeh et al
 
 '''
 
-    if QUIET:
-        def print(*args):
-            pass
+    if quiet:
+        output_stream = StringIO()
+    else:
+        output_stream = sys.stdout
 
 
 
@@ -30,7 +34,7 @@ according to the selection criteria from Yusef-Zadeh et al
     for fil in files:
 #ignoring the settingsfiles and eventual existing former analysis files
         if not ('settings' in fil.encode("ascii") or fil.startswith('__') or fil.startswith('.')):
-            print ("%s/%s" % (folder,fil.encode("ascii")))
+            print ("%s/%s" % (folder,fil.encode("ascii")), file=output_stream)
             f = open("%s/%s" % (folder,fil.encode("ascii")), 'r')
             headers = f.readline().strip().split(',')
             data = np.loadtxt(f)
@@ -61,4 +65,4 @@ according to the selection criteria from Yusef-Zadeh et al
     np.savetxt(f, out)
     f.close()
    
-    print ("Analysed %s files and saved output to %s" % (len(fil),'%s/__expected_number' % folder))
+    print ("Analysed %s files and saved output to %s" % (len(fil),'%s/__expected_number' % folder), file=output_stream)
