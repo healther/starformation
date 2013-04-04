@@ -5,8 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.spatial
 from astropy.io import fits
+from __future__ import print_function
 
-def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default'):
+
+def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default', quiet=0):
     '''Creates a sample of stars
 
 input:
@@ -20,6 +22,11 @@ returns two files in the folder 'out/' the _settings file contains the used valu
           A_v, sfr, apera, maxage, number of sampled stars, their cumulated mass and
           the expected mass
 '''
+
+    if QUIET:
+        def print(*args):
+            pass
+
     t0 = time()                 
     if appendix=='default':             # making sure not to overwrite former output
         appendix=t0                     # by using the starting time as an unique id
@@ -66,8 +73,8 @@ returns two files in the folder 'out/' the _settings file contains the used valu
         mass, age = mf.sample(1)[0], sf.sample(1)[0]
         cumass = cumass + mass
         stars.append([n, age, mass])
-#        if n % 10000 == 0:
-#            print n, cumass                                 #reporting progress
+        if n % 10000 == 0:
+            print (n, cumass)                                 #reporting progress
         n = n+1
 
 
@@ -164,14 +171,14 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
 # timing possibility for optimization efforts
 
-#    print 'starting script at %f'  %(t0)
-#    print 'initializing       %f'  %(t1-t0)
-#    print "sampleing          %f"  %(t2-t1)
-#    print "model data load    %f"  %(t3-t2)
-#    print "matching model     %f"  %(t4-t3)
-#    print "extracting fluxes  %f"  %(t5-t4)
-#    print "saving             %f"  %(t6-t5)
-#    print "________________________"
-#    print "total runtime      %f"  %(t6-t0)
-#    print "finishing script   %f"  %t6
+    print( 'starting script at %f'  %(t0))
+    print( 'initializing       %f'  %(t1-t0))
+    print( "sampleing          %f"  %(t2-t1))
+    print( "model data load    %f"  %(t3-t2))
+    print( "matching model     %f"  %(t4-t3))
+    print( "extracting fluxes  %f"  %(t5-t4))
+    print( "saving             %f"  %(t6-t5))
+    print( "________________________")
+    print( "total runtime      %f"  %(t6-t0))
+    print( "finishing script   %f"  %t6)
 

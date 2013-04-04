@@ -3,13 +3,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from decimal import Decimal
+from __future__ import print_function
 
 
-def main(folder):
+def main(folder, quiet=0):
     '''This script gives the number of "observed" stars from the sampled datafiles in "folder"/ 
 according to the selection criteria from Yusef-Zadeh et al
 
 '''
+
+    if QUIET:
+        def print(*args):
+            pass
+
+
 
     color1 = "I4"             #filter system for first color of CMD
     color2 = "M1"             #filter system for second color of CMD
@@ -22,9 +29,10 @@ according to the selection criteria from Yusef-Zadeh et al
 
     for fil in files:
 #ignoring the settingsfiles and eventual existing former analysis files
-        if not ('settings' in fil.encode("ascii") or fil.startswith('__')):
+        if not ('settings' in fil.encode("ascii") or fil.startswith('__') or fil.startswith('.')):
+            print ("%s/%s" % (folder,fil.encode("ascii")))
             f = open("%s/%s" % (folder,fil.encode("ascii")), 'r')
-            headers = f.readline().split(',')
+            headers = f.readline().strip().split(',')
             data = np.loadtxt(f)
             f.close()
 
@@ -37,7 +45,7 @@ according to the selection criteria from Yusef-Zadeh et al
             y = -2.5*(np.log10(data[:,c2]/7140))
 
 
-          # efficiency?
+          # efficiency? accuracy?
             n=0
       #selecting "observed" stars
             for i in range(len(x)):
@@ -53,4 +61,4 @@ according to the selection criteria from Yusef-Zadeh et al
     np.savetxt(f, out)
     f.close()
    
-
+    print ("Analysed %s files and saved output to %s" % (len(fil),'%s/__expected_number' % folder))
