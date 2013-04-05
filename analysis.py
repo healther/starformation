@@ -53,7 +53,7 @@ according to the selection criteria from Yusef-Zadeh et al
             n=0
       #selecting "observed" stars
             for i in range(len(x)):
-                if (y[i] < -3./8. * x[i] + 83./8.) and (max_mag < y[i] < min_mag):
+                if (y[i] < -10./3. * (x[i]-1.) + 10.) and (max_mag < y[i] < min_mag):
                     n = n+1
             av, apera, age = fil.split('_')
             out.append([Decimal(av), Decimal(apera), Decimal(age), n])

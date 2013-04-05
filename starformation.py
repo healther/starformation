@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from time import time
+from StringIO import StringIO
+import sys
 import distribution as dist  
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.spatial
 from astropy.io import fits
-from StringIO import StringIO
-import sys
 
 
-
-def main(A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default', quiet=0, precise=0):
+def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default', quiet=0, precise=0):
     '''Creates a sample of stars
 
 input:
@@ -45,32 +44,33 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     models = ['2H', '2J', '2K', 'I1', 'I2', 'I3', 'I4', 'M1', 'M2', 'M3']
 
 
+    if massfunction == 0 and starformationhistory == 0:                       
+        # star mass function
+        def f(x):               # Kouper IMF
+        #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
+            if x<.01:
+                return 0
+            elif x < .08:
+                return 62.46192*x**-.3
+            elif x < .5:
+                return 1.413352*x**-1.8
+            elif x < 1.:
+                return x**-2.3          # also value 2.7 given eq.(6) or eq (2)
+            else:
+                return x**-2.3
+        f = np.vectorize(f)
+        massfunction = dist.distribution(f, .1, 50.)
 
-    # star mass function
-    def f(x):               # Kouper IMF
-    #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
-        if x<.01:
-            return 0
-        elif x < .08:
-            return 62.46192*x**-.3
-        elif x < .5:
-            return 1.413352*x**-1.8
-        elif x < 1.:
-            return x**-2.3          # also value 2.7 given eq.(6) or eq (2)
-        else:
-            return x**-2.3
-    f = np.vectorize(f)
-    mf = dist.distribution(f, .1, 50.)
+        # star formation history
+        def g(x):
+            return sfr
+        g = np.vectorize(g)
+        starformationhistory = dist.distribution(g, 10000., maxage)
 
-    # star formation history
-    def g(x):
-        return sfr
-    g = np.vectorize(g)
-    sf = dist.distribution(g, 10000., maxage)
 
-    # todo - change sample an expected number of stars (expmass/averagemass)
-    cumass = 0.                                                     #sampled mass
-    exmass = sf.cdf()(sf._upperbound)-sf.cdf()(sf._lowerbound)      #expected mass formed
+    
+    cumass = 0.                                              #sampled mass
+    exmass = starformationhistory.cdf()(starformationhistory._upperbound)      #expected mass formed
     stars = []                                               #storing for the sample
     n = 0
 
@@ -78,15 +78,15 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
     if precise == True:
         while cumass < exmass:
-            mass, age = mf.sample(1)[0], sf.sample(1)[0]
+            mass, age = massfunction.sample(1)[0], starformationhistory.sample(1)[0]
             cumass = cumass + mass
             stars.append([n, age, mass])
             if n % 10000 == 0:
                 print (n, cumass, file=output_stream)                                 #reporting progress
             n = n+1
     else:
-        n = int(exmass/ mf.mean())               
-        mass, age = mf.sample(n), sf.sample(n)
+        n = int(exmass/ massfunction.mean())               
+        mass, age = massfunction.sample(n), starformationhistory.sample(n)
         cumass = np.sum(mass)
         stars = [[i, age[i], mass[i]] for i in range(n)]
 
@@ -107,9 +107,11 @@ returns two files in the folder 'out/' the _settings file contains the used valu
         # check for interpolation of aperature size
 
     # sampling viewing angle
-    angle = [np.random.random_integers(9) for i in range(len(stars))]
+    angle = np.random.random_integers(0,9,len(stars))
     #reading model grid
-    grid = [param[1].data[10*i][1:3] for i in range(param[1].data.size /10) ] #model data 0: name, 1: age, 2: mass ; only one per model
+    mass = param[1].data['MASSC'][::10]
+    age = param[1].data['TIME'][::10]
+    grid = np.vstack([age, mass]).transpose()
 
     #converting to logspace
     stars = np.asarray(stars)
@@ -117,7 +119,7 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     stars[:,1:] = np.log10(stars[:,1:])
 
     output = stars.tolist()                                 #creating output
-
+    
     #normalizing for nearest neighbor search
     grid[0,:] = grid[0,:]/(grid[0,:].max() - grid[0,:].min())
     grid[1,:] = grid[1,:]/(grid[1,:].max() - grid[1,:].min())
@@ -133,9 +135,11 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
     # extracting fluxes
     fluxes = [0 for j in range(len(models)) ]
+    print(len(matches), angle.shape)
+    indices = 10*np.asarray(matches) + angle
     for j in range(len(models)):
-    #    fluxes[j] = [ [model[j][1].data[10*matches[i] + angle[i]][1][app_num[j]], model[j][1].data[10*matches[i] + angle[i]][2][app_num[j]] ] for i in range(len(matches)) ]
-        fluxes[j] = [ model[j][1].data[10*matches[i] + angle[i]][1][app_num[j]] for i in range(len(matches)) ]
+        fluxes[j] = model[j][1].data[indices]['TOTAL_FLUX'][:,app_num[j]]
+
 
 
     # applying extinction
@@ -151,15 +155,11 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     t5 = time()                       #extracting fluxes complete
 
     # saving data to output: #, log10(age), log10(mass), modelmatch, (flux, flux_error, corrected_flux, corrected_flux_error) for each model
-    for i in range(len(output)):
-        output[i].append(matches[i])
-        for j in range(len(models)):
-            output[i].append(fluxes[j][i])
-            output[i].append(newfluxes[j][i])
-    #        output[i].append(fluxes[j][i][0])          possible to use if fluxerrors 
-    #        output[i].append(fluxes[j][i][1])          are necessary
-    #        output[i].append(newfluxes[j][i][0])
-    #        output[i].append(newfluxes[j][i][1])
+    fluxes = np.asarray(fluxes)
+    newfluxes = np.asarray(newfluxes)
+    print(np.asarray(output).shape, np.asarray(fluxes).transpose().shape, np.asarray(newfluxes).shape)
+    output = np.vstack([np.asarray(output).transpose(), fluxes, newfluxes]).transpose()
+
 
     # creating the output file
     head = ['#', 'age', 'mass', 'model']
@@ -198,3 +198,4 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     print( "total runtime      %f"  %(t6-t0), file=output_stream)
     print( "finishing script   %f"  %t6, file=output_stream)
 
+main()
