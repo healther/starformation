@@ -7,10 +7,11 @@ import distribution as dist
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.spatial
+from astropy.table import Table, Column
 from astropy.io import fits
 
 
-def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., distance = 8.0, appendix='default', quiet=0, precise=0):
+def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .01, apera = 24000, maxage = 2000000., distance = 8.0, appendix='default', quiet=0, precise=0):
     '''Creates a sample of stars
 
 input:
@@ -160,26 +161,50 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
 
     # creating the output file
-    head = ['#', 'age', 'mass', 'model']
-    for mod in models:
-        head.append('flux %s' % mod)
-        head.append('corrected_flux %s' % mod)
-    f = open('out/%s' % appendix, 'w')
-    f.write( ','.join(head)+'\n' )
-    np.savetxt(f, output)
-    f.close()
+    #head = ['#', 'age', 'mass', 'model']
+    #for mod in models:
+        #head.append('flux %s' % mod)
+    #for mod in models:
+        #head.append('corrected_flux %s' % mod)
+    #f = open('out/%s' % appendix, 'w')
+    #f.write( ','.join(head)+'\n' )
+    ##np.savetxt(f, output)
+    #np.savetxt(f, output)
+    #f.close()
 
-    # creating the settings file
-    f = open('out/%s_settings' % appendix, 'w')
-    settings =            '%s #visual extinction    A_v  \n' % A_v
-    settings = settings + '%s #star formation rate  sfr  \n' % sfr
-    settings = settings + '%s #star formation time  time \n' % maxage
-    settings = settings + '%s #aperature size       apera\n' % apera
-    settings = settings + '%s #number of sampled stars   \n' % len(stars)
-    settings = settings + '%s #cumulated sampled mass    \n' % cumass
-    settings = settings + '%s #expected mass             \n' % exmass
-    f.write(settings)
-    f.close()
+    # create table
+
+    t = Table()
+    t.add_column(Column(name='age', data=output[:,1]))
+    t.add_column(Column(name='mass', data=output[:,2]))
+    t.add_column(Column(name='model', data=output[:,3]))
+    #for i in range(len(models)):
+        #t.add_column(Column(name='flux %s' % models[i], data=output[:,4+i]))
+    #tmp = 4 + len(models)
+    for i in range(len(models)):
+        t.add_column(Column(name='corrected_flux %s' % models[i], data=output[:,4+i]))
+  
+    header = fits.Header()
+    header['Av'] = A_v
+    header['star formation rate'] = sfr
+    header['apperature size'] = apera
+    header['maximum age of the stars'] = maxage
+    header['distance of the formation size'] = distance
+
+    fits.writeto('out/%s' % appendix, np.array(t), header, clobber=True)
+
+
+    ## creating the settings file
+    #f = open('out/%s_settings' % appendix, 'w')
+    #settings =            '%s #visual extinction    A_v  \n' % A_v
+    #settings = settings + '%s #star formation rate  sfr  \n' % sfr
+    #settings = settings + '%s #star formation time  time \n' % maxage
+    #settings = settings + '%s #aperature size       apera\n' % apera
+    #settings = settings + '%s #number of sampled stars   \n' % len(stars)
+    #settings = settings + '%s #cumulated sampled mass    \n' % cumass
+    #settings = settings + '%s #expected mass             \n' % exmass
+    #f.write(settings)
+    #f.close()
     
     t6 = time()                       #saving complete
 
@@ -196,4 +221,4 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     print( "total runtime      %f"  %(t6-t0), file=output_stream)
     print( "finishing script   %f"  %t6, file=output_stream)
 
-#main()
+main()

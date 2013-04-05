@@ -33,20 +33,26 @@ according to the selection criteria from Yusef-Zadeh et al
 
     for fil in files:
 #only using files created by the automated simulation
-        if fil.startswith('sim_'):
+        if fil.startswith('sim_') and not 'settings' in fil.encode("ascii"):
             print ("%s/%s" % (folder,fil.encode("ascii")), file=output_stream)
-            f = open("%s/%s" % (folder,fil.encode("ascii")), 'r')
-            headers = f.readline().strip().split(',')
-            data = np.loadtxt(f)
-            f.close()
+            #f = open("%s/%s" % (folder,fil.encode("ascii")), 'r')
+            #headers = f.readline().strip().split(',')
+            #data = np.loadtxt(f)
+            #f.close()
+      
 
-      #selecting the relevant columns
-            c1 = headers.index('corrected_flux %s' % color1)
-            c2 = headers.index('corrected_flux %s' % color2)
+      # Read in
+            hdulist = fits.open('file.fits')
+            av = hdulist[1].header['age']
+            data = hdulist[1].data
+
+      ##selecting the relevant columns
+            #c1 = headers.index('corrected_flux %s' % color1)
+            #c2 = headers.index('corrected_flux %s' % color2)
 
       #calculating magnitudes from fluxes and converting to CMD-data
-            x = -2.5*(np.log10(data[:,c1]/64130) - np.log10(data[:,c2]/7140))
-            y = -2.5*(np.log10(data[:,c2]/7140))
+            x = -2.5*(np.log10(data['corrected_flux %s' % color1]/64130) - np.log10(data[:,c2]/7140))
+            y = -2.5*(np.log10(data['corrected_flux %s' % color2]/7140))
 
 
           # efficiency? accuracy?
@@ -55,7 +61,7 @@ according to the selection criteria from Yusef-Zadeh et al
             for i in range(len(x)):
                 if (y[i] < -10./3. * (x[i]-1.) + 10.) and (max_mag < y[i] < min_mag):
                     n = n+1
-            av, apera, age = fil.split('_')
+            tmp, av, apera, age = fil.split('_')
             out.append([Decimal(av), Decimal(apera), Decimal(age), n])
 
     #writing obtained data to "folder/__expected_number"
