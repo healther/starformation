@@ -50,14 +50,14 @@ def main(quiet = False):
 
 # setting up model data
     aperas = np.linspace(15000, 50000, 11)
- 
+    avs = np.linspace(5.0, 50.0, 10)
     k = 0.
     parameters = []
-    for av in np.linspace(5.0, 50.0, 10):
+    for i in range(len(avs)):
         for i in range(len(aperas)):
             for j in range(len(ages)):
-                starformation.main(mf, sf[i], av, .001, app_num[j], ages[i], "%s_%s_%s" % (av,apera,age), quiet=True)
-                print(av, apera, age, k/10./11./11., file=output_stream)
+                starformation.main(mf, sf[i], avs[i], .001, app_num[j], ages[i], "%s_%s_%s" % (av,apera,age), quiet=True)
+                print(av, apera, age, k/len(avs)/len(aperas)/float(len(ages)), file=output_stream)
                 k = k+1
                 parameters.append([av,apera,age])
 
