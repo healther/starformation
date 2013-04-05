@@ -4,6 +4,7 @@ import urllib2
 import os
 from StringIO import StringIO
 import sys
+import tarfile
 
 
 
@@ -33,7 +34,8 @@ def main(quiet=False):
             'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/I4.fits',
             'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M1.fits',
             'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M2.fits',
-            'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M3.fits'
+            'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M3.fits',
+            ''
           ]
     file_names = [
             'models/parameters.fits.gz',
@@ -46,7 +48,8 @@ def main(quiet=False):
             'models/I4.fits',
             'models/M1.fits',
             'models/M2.fits',
-            'models/M3.fits']
+            'models/M3.fits',
+            'models/extinction_law.tar.gz']
 
     for i in range(len(urls)):
         if not os.path.isfile(file_names[i]):
@@ -54,3 +57,9 @@ def main(quiet=False):
             f.write(urllib2.urlopen(urls[i]).read())
             f.close()
             print('Downloaded %s from %s' % (file_names[i],urls[i]), file=output_stream)
+
+
+    f = tarfile.open(path, 'r:gz')
+    try: f.extractall()
+    finally: f.close()
+

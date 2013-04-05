@@ -32,8 +32,8 @@ according to the selection criteria from Yusef-Zadeh et al
     out = []
 
     for fil in files:
-#ignoring the settingsfiles and eventual existing former analysis files
-        if not ('settings' in fil.encode("ascii") or fil.startswith('__') or fil.startswith('.')):
+#only using files created by the automated simulation
+        if fil.startswith('sim_'):
             print ("%s/%s" % (folder,fil.encode("ascii")), file=output_stream)
             f = open("%s/%s" % (folder,fil.encode("ascii")), 'r')
             headers = f.readline().strip().split(',')
@@ -65,4 +65,4 @@ according to the selection criteria from Yusef-Zadeh et al
     np.savetxt(f, out)
     f.close()
    
-    print ("Analysed %s files and saved output to %s" % (len(fil),'%s/__expected_number' % folder), file=output_stream)
+    print ("Analysed %s files and saved output to %s" % (len(out),'%s/__expected_number' % folder), file=output_stream)

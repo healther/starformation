@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+from __future__ import print_function, division
 from StringIO import StringIO
 import sys
+from time import time
 import distribution as dist
 import starformation
 import analysis
@@ -17,14 +18,13 @@ def main(quiet = False):
 
 
 '''
-    models = ['2H', '2J', '2K', 'I1', 'I2', 'I3', 'I4', 'M1', 'M2', 'M3']
+    t0 = time()         #timing possibility
     if quiet:
         output_stream = StringIO()
     else:
         output_stream = sys.stdout
 
     sfr = .001
-
     # star mass function
     def f(x):               # Kouper IMF
     #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
@@ -46,28 +46,51 @@ def main(quiet = False):
         return sfr
     g = np.vectorize(g)
     ages = np.linspace(500000, 2000000, 11)
-    sf = [dist.distribution(g, 10000., ages[i]) for i in range(10,11)]
+    sf = [dist.distribution(g, 10000., ages[i]) for i in range(len(ages))]
+
+    t1 = time()                 # finished reading the distributions
+
 
 # setting up model data
     aperas = np.linspace(15000, 50000, 11)
     avs = np.linspace(5.0, 50.0, 10)
-    k = 0.
+    l = 0.
     parameters = []
     for i in range(len(avs)):
-        for i in range(len(aperas)):
-            for j in range(len(ages)):
-                starformation.main(mf, sf[i], avs[i], .001, app_num[j], ages[i], "%s_%s_%s" % (av,apera,age), quiet=True)
-                print(av, apera, age, k/len(avs)/len(aperas)/float(len(ages)), file=output_stream)
-                k = k+1
-                parameters.append([av,apera,age])
+        for j in range(len(aperas)):
+            for k in range(len(ages)):
+                starformation.main(massfunction = mf, starformationhistory = sf[k], A_v = avs[i], sfr = .001, \
+                    apera = aperas[j], maxage = ages[k], appendix = "%s_%s_%s_%s" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
+                print(avs[i],aperas[j],ages[k], l/len(avs)/len(aperas)/len(ages), file=output_stream)
+                l = l+1
+                parameters.append([avs[i],aperas[j],ages[k]])
 
-    starformation.main(massfunction = mf, starformationhistory = sf[0], A_v = 10.0, sfr = .001, apera = aperas[2], maxage = 2000000.)
+    t2 = time()                 # end of simulation
+    
     print ('number of simulations run: %s' %k , file=output_stream)  
     head = ['AV', 'Aperature_size', 'Age']
     f = open('out/__head', 'w')
     f.write( ','.join(head)+'\n' )
     np.savetxt(f, parameters)
     f.close()
+
+    t3 = time()                 # end of saving data
+
     analysis.main('out', quiet=True)
     print ('analysis complete' , file=output_stream)  
- 
+    
+    t4 = time()                 # end of analysing data
+
+
+
+    print( 'starting script at %f'  %(t0), file=output_stream)
+    print( 'initializing       %f'  %(t1-t0), file=output_stream)
+    print( "running simulation %f"  %(t2-t1), file=output_stream)
+    print( "writing data       %f"  %(t3-t2), file=output_stream)
+    print( "analysing data     %f"  %(t4-t3), file=output_stream)
+    print( "________________________", file=output_stream)
+    print( "total runtime      %f"  %(t4-t0), file=output_stream)
+    print( "finishing script   %f"  %t4, file=output_stream)
+
+
+main()

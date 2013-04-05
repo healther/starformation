@@ -10,7 +10,7 @@ import scipy.spatial
 from astropy.io import fits
 
 
-def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., appendix='default', quiet=0, precise=0):
+def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .001, apera = 24000, maxage = 2000000., distance = 8.0, appendix='default', quiet=0, precise=0):
     '''Creates a sample of stars
 
 input:
@@ -135,7 +135,6 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
     # extracting fluxes
     fluxes = [0 for j in range(len(models)) ]
-    print(len(matches), angle.shape)
     indices = 10*np.asarray(matches) + angle
     for j in range(len(models)):
         fluxes[j] = model[j][1].data[indices]['TOTAL_FLUX'][:,app_num[j]]
@@ -149,7 +148,7 @@ returns two files in the folder 'out/' the _settings file contains the used valu
 
     newfluxes = [0 for j in range(len(models)) ]
     for j in range(len(models)):
-        newfluxes[j] = np.asarray(fluxes[j]) * correctionfactor[j] 
+        newfluxes[j] = np.asarray(fluxes[j]) * correctionfactor[j] * (1./distance)**2
 
 
     t5 = time()                       #extracting fluxes complete
@@ -157,7 +156,6 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     # saving data to output: #, log10(age), log10(mass), modelmatch, (flux, flux_error, corrected_flux, corrected_flux_error) for each model
     fluxes = np.asarray(fluxes)
     newfluxes = np.asarray(newfluxes)
-    print(np.asarray(output).shape, np.asarray(fluxes).transpose().shape, np.asarray(newfluxes).shape)
     output = np.vstack([np.asarray(output).transpose(), fluxes, newfluxes]).transpose()
 
 
@@ -198,4 +196,4 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     print( "total runtime      %f"  %(t6-t0), file=output_stream)
     print( "finishing script   %f"  %t6, file=output_stream)
 
-main()
+#main()
