@@ -29,7 +29,7 @@ def main():
 
 
     X, Y = np.meshgrid(avs, ages)
-    Z = 559./np.transpose(numbers[:,aperature,:])
+    Z = 559.*.08/np.transpose(numbers[:,aperature,:])
     surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm)
     fig.colorbar(surf)
 
@@ -58,7 +58,7 @@ def main():
 
     x2 = data[:,2].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
     y2 = data[:,1].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
-    z2 = 559./data[:,3].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
+    z2 = 559.*.08/data[:,3].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
     ax2.scatter(x2,y2,z2)
     ax2.set_xlabel('age')
     ax2.set_ylabel('apera')

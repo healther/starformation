@@ -24,7 +24,7 @@ def main(quiet = False):
     else:
         output_stream = sys.stdout
 
-    sfr = .001
+    sfr = .08
     # star mass function
     def f(x):               # Kouper IMF
     #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
@@ -52,14 +52,14 @@ def main(quiet = False):
 
 
 # setting up model data
-    aperas = np.linspace(15000, 50000, 11)
-    avs = np.linspace(5.0, 50.0, 10)
+    aperas = np.linspace(10000, 50000, 5)
+    avs = np.linspace(10.0, 50.0, 5)
     l = 0.
     parameters = []
     for i in range(len(avs)):
         for j in range(len(aperas)):
             for k in range(len(ages)):
-                starformation.main(massfunction = mf, starformationhistory = sf[k], A_v = avs[i], sfr = .001, \
+                starformation.main(massfunction = mf, starformationhistory = sf[k], A_v = avs[i], sfr = .08, \
                     apera = aperas[j], maxage = ages[k], appendix = "%s_%s_%s_%s" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
                 print(avs[i],aperas[j],ages[k], l/len(avs)/len(aperas)/len(ages), file=output_stream)
                 l = l+1

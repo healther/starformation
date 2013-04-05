@@ -221,4 +221,4 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     print( "total runtime      %f"  %(t6-t0), file=output_stream)
     print( "finishing script   %f"  %t6, file=output_stream)
 
-main()
+main(sfr = .08)
