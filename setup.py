@@ -9,7 +9,7 @@ import tarfile
 
 
 def main(quiet=False):
-    '''setup.main(quiet=False)
+    '''main(quiet=False)
 
 Pulling all necessary files for using the starformation script
 
@@ -20,6 +20,10 @@ It also pulls the extinction law from
 http://caravan.astro.wisc.edu/protostars/info.php?topic=sedfitter_results 
 if you have problems with them please contact
 http://caravan.astro.wisc.edu/protostars/contact.php
+
+Parameter
+---------
+quiet  boolean  if true surpresses all standard output
 '''
     if quiet:
         output_stream = StringIO()

@@ -18,7 +18,8 @@ def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .01, aper
 
 Creates a sample of stars
 
-input:
+Parameters
+----------
 massfunction            distribution
 starformation history   distribution
 A_v       float     value for the visual extinction 
@@ -40,7 +41,8 @@ The distributions must provide an object which has the following members:
     float    mean()         returns the mean value of the distribution
 
 
-output:
+Returns
+----------
 returns a fits file in the out-folder, either using the appendix as filename or the time of the
       starting of the script in order to prevent overwriting existing files
       In the header of the fits-file are the values: A_v, sfr, apera, maxage and distance recorded

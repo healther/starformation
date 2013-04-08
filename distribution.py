@@ -12,16 +12,18 @@ class distribution( object ):
     '''distribution(func, a, b)
 
 A distribution object represents a probability distribution, the provided function is taken as the
-probability density function and an cumulative density function and its inverse a calculated. a and
-b are taken as the lower and the upper bound respectively.
-func need not to be normalized
+probability density function and an cumulative density function and its inverse are calculated. `a` and
+`b` are taken as the lower and the upper bound respectively.
+`func` need not to be normalized
 
-input:
+Parameters
+----------
 func    function  specifies the probability density function of the distribution
 a       float     specifies the lower bound of the distribution
 b       float     specifies the upper bound of the distribution
 
-members:
+Members
+----------
 pdf()          returns the probability density function, takes a float as an argument
 cdf()          returns the cumulative probability density function, takes a float as an argument
 ppf()          returns the inverse cumulative probability funciton, takes a float as an argument
