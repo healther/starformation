@@ -48,8 +48,8 @@ This script produces a grid of expected numbers of stars according to the select
     def g(x):
         return sfr
     g = np.vectorize(g)
-    ages = np.linspace(500000, 2000000, 11)
-    sf = [dist.distribution(g, 10000., ages[i]) for i in range(len(ages))]
+    ages = np.logspace(5,7,7)
+    sf = [dist.distribution(g, 1000., ages[i]) for i in range(len(ages))]
 
     t1 = time()                 # finished reading the distributions
     print(t1)
@@ -65,7 +65,7 @@ This script produces a grid of expected numbers of stars according to the select
             for k in range(len(ages)):
                 starformation.main(massfunction = mf, starformationhistory = sf[k], \
                     A_v = avs[i], sfr = sfr, apera = aperas[j], maxage = ages[k], \
-                    appendix = "%s_%03d_%06d_%07d" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
+                    appendix = "%s_%03d_%06d_%09d" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
                 print(avs[i],aperas[j],ages[k], l/len(avs)/len(aperas)/len(ages), file=output_stream)
                 l = l+1
                 parameters.append([avs[i],aperas[j],ages[k]])

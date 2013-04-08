@@ -56,13 +56,6 @@ The first line of the file is an ','-seperated head of the contained information
             x = -2.5*(np.log10(data['cflux %s' % color1]/64130) - np.log10(data['cflux %s' % color2]/7140))
             y = -2.5*(np.log10(data['cflux %s' % color2]/7140))
 
-
-          # efficiency? accuracy?
-            n=0
-      #selecting "observed" stars
-            #for i in range(len(x)):
-                #if (y[i] > -10./3. * (x[i]-1.) + 10.) and (max_mag < y[i] < min_mag):
-                    #n = n+1
             n = sum(np.logical_and( (y > -10./3. * (x-1.) + 10.), np.logical_and(max_mag < y, y < min_mag)))
             tmp, av, apera, age = fil.split('_')
             out.append([Decimal(av), Decimal(apera), Decimal(age), n])
