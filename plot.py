@@ -6,10 +6,11 @@ from matplotlib.mlab import griddata
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
+from astropy.io import fits
 
 
 def main():
-    aperature = 2
+    aperature = 1
     visual_ex = 1
 
 
@@ -21,52 +22,52 @@ def main():
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    avs = np.linspace(5.0, 50.0, 10)
-    aperas = np.linspace(15000, 50000, 11)
+    avs = np.linspace(10.0, 50.0, 5)
+    aperas = np.linspace(10000, 50000, 5)
     ages = np.linspace(500000, 2000000, 11)
-    numbers = data[:,3].reshape(10, 11, 11)
+    numbers = data[:,3].reshape(5, 5, 11)
     numbers = np.roll(numbers,4,2)
 
 
     X, Y = np.meshgrid(avs, ages)
-    Z = 559.*.08/np.transpose(numbers[:,aperature,:])
+    Z = 559.*.01/np.transpose(numbers[:,aperature,:])
     surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm)
     fig.colorbar(surf)
 
 
-    x = X.reshape(110)
-    y = Y.reshape(110)
-    z = Z.reshape(110)
+    x = X.reshape(55)
+    y = Y.reshape(55)
+    z = Z.reshape(55)
 
 
     ax.scatter(x,y,z)
     ax.set_xlabel('av')
     ax.set_ylabel('age')
-    ax.set_zlabel('starformation rate in 0.001 M_sun/year')
+    ax.set_zlabel('starformation rate in M_sun/year')
 
-    plt.savefig('av-age.svg')
+    plt.savefig('plot/av-age.svg')
 
     fig2 = plt.figure()
     ax2 = fig2.gca(projection='3d')
 
 
     X2, Y2 = np.meshgrid(ages, aperas)
-    Z2 = numbers[visual_ex,:,:]/559.
+    Z2 = 559.*.01/numbers[visual_ex,:,:]
     surf2 = ax2.plot_surface(X2, Y2, Z2, rstride=1, cstride=1, cmap=cm.coolwarm)
     fig2.colorbar(surf2)
 
 
-    x2 = data[:,2].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
-    y2 = data[:,1].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
-    z2 = 559.*.08/data[:,3].reshape(10, 11, 11)[visual_ex,:,:].reshape(121)
+    x2 = data[:,2].reshape(5, 5, 11)[visual_ex,:,:].reshape(55)
+    y2 = data[:,1].reshape(5, 5, 11)[visual_ex,:,:].reshape(55)
+    z2 = 559.*.01/data[:,3].reshape(5, 5, 11)[visual_ex,:,:].reshape(55)
     ax2.scatter(x2,y2,z2)
     ax2.set_xlabel('age')
     ax2.set_ylabel('apera')
-    ax2.set_zlabel('starformation rate in 0.001 M_sun/year')
+    ax2.set_zlabel('starformation rate in M_sun/year')
 
 
 
-    plt.savefig('age-apera.svg')
+    plt.savefig('plot/age-apera.svg')
 
 
 
@@ -81,16 +82,24 @@ def cmd(folder, av, apera, age):
     selectmax = 0.
     selectmin = 8.
 
-    f = open("%s/sim_%s_%s_%s" % (folder,av,apera,age), 'r')
-    headers = f.readline().strip().split(',')
-    data = np.loadtxt(f)
-    f.close()
+    #f = open("%s/sim_%s_%s_%s" % (folder,av,apera,age), 'r')
+    #headers = f.readline().strip().split(',')
+    #data = np.loadtxt(f)
+    #f.close()
+    
+    hdulist = fits.open('%s/%s' %(folder,'sim_%s_%s_%s'%(av,apera,age)))
+#            av = hdulist[1].header['age']
+    data = hdulist[1].data
+  
+    x = -2.5*(np.log10(data['cflux %s' % color1]/64130) - np.log10(data['cflux %s' % color2]/7140))
+    y = -2.5*(np.log10(data['cflux %s' % color2]/7140))
 
-    c1 = headers.index('corrected_flux %s' % color1)
-    c2 = headers.index('corrected_flux %s' % color2)
 
-    x = -2.5*(np.log10(data[:,c1]/64130) - np.log10(data[:,c2]/7140))
-    y = -2.5*(np.log10(data[:,c2]/7140))
+    #c1 = headers.index('corrected_flux %s' % color1)
+    #c2 = headers.index('corrected_flux %s' % color2)
+
+    #x = -2.5*(np.log10(data[:,c1]/64130) - np.log10(data[:,c2]/7140))
+    #y = -2.5*(np.log10(data[:,c2]/7140))
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.scatter(x,y)
@@ -105,4 +114,4 @@ def cmd(folder, av, apera, age):
     ax.set_ylim(ymin, ymax)
     ax.set_title('%s_%s_%s.svg' %(av,apera,age))
 
-    plt.savefig('%s_%s_%s.svg' %(av,apera,age))
+    plt.savefig('plot/%s_%s_%s.svg' %(av,apera,age))

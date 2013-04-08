@@ -157,8 +157,7 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     # saving data to output: #, log10(age), log10(mass), modelmatch, (flux, flux_error, corrected_flux, corrected_flux_error) for each model
     fluxes = np.asarray(fluxes)
     newfluxes = np.asarray(newfluxes)
-    output = np.vstack([np.asarray(output).transpose(), fluxes, newfluxes]).transpose()
-
+    output = np.vstack([np.asarray(output).transpose(), matches, fluxes, newfluxes]).transpose()
 
     # creating the output file
     #head = ['#', 'age', 'mass', 'model']
@@ -178,18 +177,17 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     t.add_column(Column(name='age', data=output[:,1]))
     t.add_column(Column(name='mass', data=output[:,2]))
     t.add_column(Column(name='model', data=output[:,3]))
-    #for i in range(len(models)):
-        #t.add_column(Column(name='flux %s' % models[i], data=output[:,4+i]))
-    #tmp = 4 + len(models)
     for i in range(len(models)):
-        t.add_column(Column(name='corrected_flux %s' % models[i], data=output[:,4+i]))
+        t.add_column(Column(name='flux %s' % models[i], data=output[:,4+i]))
+    for i in range(len(models)):
+        t.add_column(Column(name='cflux %s' % models[i], data=output[:,4+len(models)+i]))
   
     header = fits.Header()
-    header['Av'] = A_v
-    header['star formation rate'] = sfr
-    header['apperature size'] = apera
-    header['maximum age of the stars'] = maxage
-    header['distance of the formation size'] = distance
+    header['AV'] = A_v
+    header['SFR'] = sfr
+    header['APPERA'] = apera
+    header['MAXAGE'] = maxage
+    header['DIST'] = distance
 
     fits.writeto('out/%s' % appendix, np.array(t), header, clobber=True)
 
@@ -221,4 +219,4 @@ returns two files in the folder 'out/' the _settings file contains the used valu
     print( "total runtime      %f"  %(t6-t0), file=output_stream)
     print( "finishing script   %f"  %t6, file=output_stream)
 
-main(sfr = .08)
+#main(sfr = .08)

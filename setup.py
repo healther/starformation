@@ -35,7 +35,7 @@ def main(quiet=False):
             'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M1.fits',
             'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M2.fits',
             'http://www.mpia-hd.mpg.de/~robitaille/share/andreas/M3.fits',
-            ''
+            'http://caravan.astro.wisc.edu/protostars/files/extinction_law.tar.gz'
           ]
     file_names = [
             'models/parameters.fits.gz',
@@ -58,8 +58,8 @@ def main(quiet=False):
             f.close()
             print('Downloaded %s from %s' % (file_names[i],urls[i]), file=output_stream)
 
-
-    f = tarfile.open(path, 'r:gz')
-    try: f.extractall()
-    finally: f.close()
+    if not os.path.isfile('modesl/extinction_law.ascii')
+        f = tarfile.open('models/extinction_law.tar.gz', 'r:gz')
+        try: f.extractall()
+        finally: f.close()
 

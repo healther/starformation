@@ -6,6 +6,7 @@ import os
 from decimal import Decimal
 from StringIO import StringIO
 import sys
+from astropy.io import fits
 
 
 
@@ -42,8 +43,8 @@ according to the selection criteria from Yusef-Zadeh et al
       
 
       # Read in
-            hdulist = fits.open('file.fits')
-            av = hdulist[1].header['age']
+            hdulist = fits.open('%s/%s' %(folder,fil))
+#            av = hdulist[1].header['age']
             data = hdulist[1].data
 
       ##selecting the relevant columns
@@ -51,8 +52,8 @@ according to the selection criteria from Yusef-Zadeh et al
             #c2 = headers.index('corrected_flux %s' % color2)
 
       #calculating magnitudes from fluxes and converting to CMD-data
-            x = -2.5*(np.log10(data['corrected_flux %s' % color1]/64130) - np.log10(data[:,c2]/7140))
-            y = -2.5*(np.log10(data['corrected_flux %s' % color2]/7140))
+            x = -2.5*(np.log10(data['cflux %s' % color1]/64130) - np.log10(data['cflux %s' % color2]/7140))
+            y = -2.5*(np.log10(data['cflux %s' % color2]/7140))
 
 
           # efficiency? accuracy?

@@ -19,6 +19,7 @@ def main(quiet = False):
 
 '''
     t0 = time()         #timing possibility
+    print(t0)
     if quiet:
         output_stream = StringIO()
     else:
@@ -49,23 +50,25 @@ def main(quiet = False):
     sf = [dist.distribution(g, 10000., ages[i]) for i in range(len(ages))]
 
     t1 = time()                 # finished reading the distributions
+    print(t1)
 
 
 # setting up model data
-    aperas = np.linspace(10000, 50000, 5)
+    aperas = np.logspace(2, 5, 4)
     avs = np.linspace(10.0, 50.0, 5)
     l = 0.
     parameters = []
     for i in range(len(avs)):
         for j in range(len(aperas)):
             for k in range(len(ages)):
-                starformation.main(massfunction = mf, starformationhistory = sf[k], A_v = avs[i], sfr = .08, \
-                    apera = aperas[j], maxage = ages[k], appendix = "%s_%s_%s_%s" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
+                starformation.main(massfunction = mf, starformationhistory = sf[k], A_v = avs[i], sfr = .01, \
+                    apera = aperas[j], maxage = ages[k], appendix = "%s_%03d_%06d_%07d" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
                 print(avs[i],aperas[j],ages[k], l/len(avs)/len(aperas)/len(ages), file=output_stream)
                 l = l+1
                 parameters.append([avs[i],aperas[j],ages[k]])
 
     t2 = time()                 # end of simulation
+    print(t2, t1, t2-t1)
     
     print ('number of simulations run: %s' %k , file=output_stream)  
     head = ['AV', 'Aperature_size', 'Age']
