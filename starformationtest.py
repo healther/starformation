@@ -10,13 +10,10 @@ import scipy.spatial
 from astropy.table import Table, Column
 from astropy.io import fits
 
-
+@profile
 def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .01, apera = 24000,\
  maxage = 2000000., distance = 8.0, appendix='default', quiet=0, precise=0):
-    '''main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .01, apera = 24000,\
- maxage = 2000000., distance = 8.0, appendix='default', quiet=0, precise=0)
-
-Creates a sample of stars
+    '''Creates a sample of stars
 
 input:
 massfunction            distribution
@@ -236,4 +233,24 @@ returns a fits file in the out-folder, either using the appendix as filename or 
     print( "total runtime      %f"  %(t6-t0), file=output_stream)
     print( "finishing script   %f"  %t6, file=output_stream)
 
-#main(sfr = .08)
+def f(x):               # Kouper IMF
+        #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
+    if x<.01:
+        return 0
+    elif x < .08:
+        return 62.46192*x**-.3
+    elif x < .5:
+        return 1.413352*x**-1.8
+    elif x < 1.:
+        return x**-2.3          # also value 2.7 given eq.(6) or eq (2)
+    else:
+        return x**-2.3
+f = np.vectorize(f)
+massfunction = dist.distribution(f, .1, 50.)
+
+        # star formation history
+def g(x):
+    return .08
+g = np.vectorize(g)
+starformationhistory = dist.distribution(g, 10000., 2000000.)
+main(sfr = .08, massfunction = massfunction, starformationhistory = starformationhistory)

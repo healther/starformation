@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#test commentary
+from __future__ import print_function, division
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.mlab import griddata
@@ -11,7 +11,7 @@ from astropy.io import fits
 
 def main():
     aperature = 1
-    visual_ex = 1
+    visual_ex = 0
 
 
     f = open('out/__expected_number', 'r')
@@ -23,14 +23,13 @@ def main():
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     avs = np.linspace(10.0, 50.0, 5)
-    aperas = np.linspace(10000, 50000, 5)
+    aperas = np.logspace(2, 5, 4)
     ages = np.linspace(500000, 2000000, 11)
-    numbers = data[:,3].reshape(5, 5, 11)
-    numbers = np.roll(numbers,4,2)
+    numbers = np.clip(data[:,3].reshape(5, 4, 11),5.,100000.) #prevent inf if no stars are detected
 
 
     X, Y = np.meshgrid(avs, ages)
-    Z = 559.*.01/np.transpose(numbers[:,aperature,:])
+    Z = 559.*.08/np.transpose(numbers[:,aperature,:])
     surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm)
     fig.colorbar(surf)
 
@@ -44,30 +43,34 @@ def main():
     ax.set_xlabel('av')
     ax.set_ylabel('age')
     ax.set_zlabel('starformation rate in M_sun/year')
+    #ax.set_zlim(0.,1.)
+    ax.set_title('Starformation as a function of\n visual extinction Av and age at apperaturesize=1kpc')
 
-    plt.savefig('plot/av-age.svg')
+    #plt.savefig('plot/av-age.svg')
 
     fig2 = plt.figure()
     ax2 = fig2.gca(projection='3d')
 
 
-    X2, Y2 = np.meshgrid(ages, aperas)
-    Z2 = 559.*.01/numbers[visual_ex,:,:]
+    X2, Y2 = np.meshgrid(ages, np.log10(aperas))
+    Z2 = 559.*.08/numbers[visual_ex,:,:]
     surf2 = ax2.plot_surface(X2, Y2, Z2, rstride=1, cstride=1, cmap=cm.coolwarm)
     fig2.colorbar(surf2)
 
 
-    x2 = data[:,2].reshape(5, 5, 11)[visual_ex,:,:].reshape(55)
-    y2 = data[:,1].reshape(5, 5, 11)[visual_ex,:,:].reshape(55)
-    z2 = 559.*.01/data[:,3].reshape(5, 5, 11)[visual_ex,:,:].reshape(55)
+    x2 = data[:,2].reshape(5, 4, 11)[visual_ex,:,:].reshape(44)
+    y2 = np.log10(data[:,1].reshape(5, 4, 11)[visual_ex,:,:].reshape(44))
+    z2 = 559.*.08/data[:,3].reshape(5, 4, 11)[visual_ex,:,:].reshape(44)
     ax2.scatter(x2,y2,z2)
     ax2.set_xlabel('age')
-    ax2.set_ylabel('apera')
+    ax2.set_ylabel('log(apera)')
     ax2.set_zlabel('starformation rate in M_sun/year')
+   # ax2.set_zlim(0.,1.)
+    ax2.set_title('Starformation as a function of\n visual extinction apperaturesize and age at Av=10')
 
 
 
-    plt.savefig('plot/age-apera.svg')
+   # plt.savefig('plot/age-apera.png')
 
 
 
@@ -78,7 +81,7 @@ def cmd(folder, av, apera, age):
     xmin = -1.
     xmax = 8.
     ymin = 15.
-    ymax = 0.
+    ymax = -1.
     selectmax = 0.
     selectmin = 8.
 
@@ -86,8 +89,8 @@ def cmd(folder, av, apera, age):
     #headers = f.readline().strip().split(',')
     #data = np.loadtxt(f)
     #f.close()
-    
-    hdulist = fits.open('%s/%s' %(folder,'sim_%s_%s_%s'%(av,apera,age)))
+  
+    hdulist = fits.open('%s/%s' %(folder,'sim_%03d_%06d_%07d'%(av,apera,age)))
 #            av = hdulist[1].header['age']
     data = hdulist[1].data
   

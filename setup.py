@@ -9,8 +9,17 @@ import tarfile
 
 
 def main(quiet=False):
-    '''Pulling all necessary files for using the starformation script
+    '''setup.main(quiet=False)
 
+Pulling all necessary files for using the starformation script
+
+This script pulls the fits-files for the radiation models from the MPIA-folder of Thomas
+Robitaille, if the files have been moved feel free to contact robitaille@mpia.de
+
+It also pulls the extinction law from 
+http://caravan.astro.wisc.edu/protostars/info.php?topic=sedfitter_results 
+if you have problems with them please contact
+http://caravan.astro.wisc.edu/protostars/contact.php
 '''
     if quiet:
         output_stream = StringIO()

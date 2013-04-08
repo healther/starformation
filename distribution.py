@@ -9,8 +9,27 @@ import scipy.interpolate as interpol
 
 
 class distribution( object ):
-    '''to be added
+    '''distribution(func, a, b)
 
+A distribution object represents a probability distribution, the provided function is taken as the
+probability density function and an cumulative density function and its inverse a calculated. a and
+b are taken as the lower and the upper bound respectively.
+func need not to be normalized
+
+input:
+func    function  specifies the probability density function of the distribution
+a       float     specifies the lower bound of the distribution
+b       float     specifies the upper bound of the distribution
+
+members:
+pdf()          returns the probability density function, takes a float as an argument
+cdf()          returns the cumulative probability density function, takes a float as an argument
+ppf()          returns the inverse cumulative probability funciton, takes a float as an argument
+norm()         returns the normalisation factor (integral over pdf)
+sample(int n)  returns an array of n sampled values
+mean()         returns the mean value of the distribution
+_lowerbound    lowerbound of the distribution
+_upperbound    upperbound of the distribution
 '''
     def __init__(self, func = lambda x: 1, a = 0., b = 1000.):
         self._pdf = func

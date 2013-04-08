@@ -11,7 +11,9 @@ from astropy.io import fits
 
 
 def main(quiet = False):
-    ''' This script produces a grid of expected numbers of stars according to the selection 
+    '''execute.main(quiet = False)
+
+This script produces a grid of expected numbers of stars according to the selection 
     criteria of Yusef-Zedah et al. 2009, 702,178-225 The Astrophysical Journal.
     The grid is in av for visual extinction, apera for aperature size and age for the maxage 
     of the starformation size
@@ -25,7 +27,7 @@ def main(quiet = False):
     else:
         output_stream = sys.stdout
 
-    sfr = .08
+    sfr = .01
     # star mass function
     def f(x):               # Kouper IMF
     #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
@@ -61,8 +63,9 @@ def main(quiet = False):
     for i in range(len(avs)):
         for j in range(len(aperas)):
             for k in range(len(ages)):
-                starformation.main(massfunction = mf, starformationhistory = sf[k], A_v = avs[i], sfr = .01, \
-                    apera = aperas[j], maxage = ages[k], appendix = "%s_%03d_%06d_%07d" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
+                starformation.main(massfunction = mf, starformationhistory = sf[k], \
+                    A_v = avs[i], sfr = sfr, apera = aperas[j], maxage = ages[k], \
+                    appendix = "%s_%03d_%06d_%07d" % ('sim',avs[i],aperas[j],ages[k]), quiet=True)
                 print(avs[i],aperas[j],ages[k], l/len(avs)/len(aperas)/len(ages), file=output_stream)
                 l = l+1
                 parameters.append([avs[i],aperas[j],ages[k]])
@@ -70,7 +73,7 @@ def main(quiet = False):
     t2 = time()                 # end of simulation
     print(t2, t1, t2-t1)
     
-    print ('number of simulations run: %s' %k , file=output_stream)  
+    print ('number of simulations run: %s' %l , file=output_stream)  
     head = ['AV', 'Aperature_size', 'Age']
     f = open('out/__head', 'w')
     f.write( ','.join(head)+'\n' )
@@ -79,7 +82,7 @@ def main(quiet = False):
 
     t3 = time()                 # end of saving data
 
-    analysis.main('out', quiet=True)
+    analysis.main('out')
     print ('analysis complete' , file=output_stream)  
     
     t4 = time()                 # end of analysing data
