@@ -19,7 +19,7 @@ according to the selection criteria from Yusef-Zadeh et al
 Parameters
 ----------
 folder  String   Specifiecs the folder where the files are
-quiet   boolean  =1 surpresses all standard output
+quiet   boolean  =1 suppresses all standard output
 
 Returns
 -------
