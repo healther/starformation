@@ -10,7 +10,7 @@ from astropy.io import fits
 
 
 def main(aperature = 1, visual_ex = 0):
-'''main(aperature = 1, visual_ex = 0)
+    '''main(aperature = 1, visual_ex = 0)
 
 Parameters
 ----------
@@ -88,7 +88,7 @@ of the data in 'out/__expected_number'
 
 
 def cmd(folder, av, apera, age, color1 = "I4", color2 = "M1"):
-'''cmd(folder, av, apera, age, color1 = "I4", color2 = "M1") - creates a CMD
+    '''cmd(folder, av, apera, age, color1 = "I4", color2 = "M1") - creates a CMD
 
 Parameters
 ----------
@@ -134,7 +134,7 @@ using the `color1-color2` vs `color2`
 
 
 def plot_2d(aperature = 1, visual_ex = 0):
-'''plot_2d(aperature = 1, visual_ex = 0) - creates two 2d contour plots
+    '''plot_2d(aperature = 1, visual_ex = 0) - creates two 2d contour plots
 
 Parameters
 ----------
@@ -211,7 +211,7 @@ of the data in 'out/__expected_number'
 
 
 def init():
-'''init() - aquires the base data
+    '''init() - aquires the base data
 
 '''
     f = open('out/__head', 'r')
