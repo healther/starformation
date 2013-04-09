@@ -7,6 +7,7 @@ from decimal import Decimal
 from StringIO import StringIO
 import sys
 from astropy.io import fits
+from astropy.table import Table, Column
 
 
 
@@ -19,7 +20,7 @@ according to the selection criteria from Yusef-Zadeh et al
 Parameters
 ----------
 folder  String   Specifiecs the folder where the files are
-quiet   boolean  =1 surpresses all standard output
+quiet   boolean  =1 suppresses all standard output
 
 Returns
 -------
@@ -58,8 +59,19 @@ The first line of the file is an ','-seperated head of the contained information
             x = -2.5*(np.log10(data['c%s' % color1]/64130) - np.log10(data['c%s' % color2]/7140))
             y = -2.5*(np.log10(data['c%s' % color2]/7140))
 
-            n = sum(np.logical_and( (y > -10./3. * (x-1.) + 10.), np.logical_and(max_mag < y, y < min_mag)))
+            
+            sel = np.logical_and( (y > -10./3. * (x-1.) + 10.), np.logical_and(max_mag < y, y < min_mag))
+            n = sum(sel)
+            t = Table(hdulist[1].data)
+            if 'sel' in t.columns:
+                t.remove_column('sel')
+            t.add_column(Column(name='sel', data=sel.astype('int')))
+            
+            hdulist[1].data = np.array(t)
             tmp, av, apera, age = fil.split('_')
+            #hdulist = fits.open('%s/%s' %(folder,fil), 'write')
+            #hdulist.writeto('%s/%s' %(folder,fil), clobber=True)
+            fits.update('%s/%s' %(folder,fil), np.array(t), ext = 1, clobber=True)
             out.append([Decimal(av), Decimal(apera), Decimal(age), n])
 
     #writing obtained data to "folder/__expected_number"

@@ -28,7 +28,7 @@ apera     float     used aperature size for selecting the fluxes of the protosta
 maxage    float     age of the star formation site, sfr is assumed to be constant
 distance  float     distance to the simulated starformation site
 appendix  String    sets the outputfilename, default is the starting time (via time.time())
-quiet     boolean   if true (=1) surpresses all standard output
+quiet     boolean   if true (=1) suppresses all standard output
 precise   boolean   if true (=1) sample single star till expected mass reached, else calculate
                     expected number and sample as an array
 
@@ -178,18 +178,6 @@ returns a fits file in the out-folder, either using the appendix as filename or 
     newfluxes = np.asarray(newfluxes)
     output = np.vstack([np.asarray(output).transpose(), matches, fluxes, newfluxes]).transpose()
 
-    # creating the output file
-    #head = ['#', 'age', 'mass', 'model']
-    #for mod in models:
-        #head.append('flux %s' % mod)
-    #for mod in models:
-        #head.append('corrected_flux %s' % mod)
-    #f = open('out/%s' % appendix, 'w')
-    #f.write( ','.join(head)+'\n' )
-    ##np.savetxt(f, output)
-    #np.savetxt(f, output)
-    #f.close()
-
     # create table
     # data table
     t = Table()
@@ -200,6 +188,7 @@ returns a fits file in the out-folder, either using the appendix as filename or 
         t.add_column(Column(name='%s' % models[i], data=output[:,4+i]))
     for i in range(len(models)):
         t.add_column(Column(name='c%s' % models[i], data=output[:,4+len(models)+i]))
+   # t.add_column(Column(name='sel', data=zeros(len(models[0]))))
     # head table
     header = Table()
     header.add_column(Column(name='AV', data = [A_v]))

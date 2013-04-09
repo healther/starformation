@@ -232,3 +232,31 @@ def init():
 
     return avs, aperas, ages, sfr, headers, data
 
+
+def histogram(folder, av, apera, age, color1 = "I4", color2 = "M1"):
+    
+    hdulist = fits.open('%s/%s' %(folder,'sim_%03d_%06d_%09d'%(av,apera,age)))
+    data = hdulist[1].data
+
+
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+
+    pdf, bins, patches = ax.hist(data['mass'], range=(-.5,1.5))
+    dat = data['mass'][data['sel'] == 1]
+    pdf, bins, patches = ax.hist(dat, range=(-.5,1.5))
+    #ax.set_yscale('log')
+
+
+
+
+
+
+
+
+
+
+
+

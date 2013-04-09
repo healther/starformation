@@ -20,7 +20,7 @@ This script produces a grid of expected numbers of stars according to the select
 
 Parameters
 ----------
-quiet   boolean  if true surpresses all standard output
+quiet   boolean  if true suppresses all standard output
 
 
 Returns

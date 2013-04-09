@@ -23,7 +23,7 @@ http://caravan.astro.wisc.edu/protostars/contact.php
 
 Parameter
 ---------
-quiet  boolean  if true surpresses all standard output
+quiet  boolean  if true suppresses all standard output
 '''
     if quiet:
         output_stream = StringIO()
