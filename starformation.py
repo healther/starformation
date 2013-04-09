@@ -191,24 +191,26 @@ returns a fits file in the out-folder, either using the appendix as filename or 
     #f.close()
 
     # create table
-
+    # data table
     t = Table()
     t.add_column(Column(name='age', data=output[:,1]))
     t.add_column(Column(name='mass', data=output[:,2]))
     t.add_column(Column(name='model', data=output[:,3]))
     for i in range(len(models)):
-        t.add_column(Column(name='flux %s' % models[i], data=output[:,4+i]))
+        t.add_column(Column(name='%s' % models[i], data=output[:,4+i]))
     for i in range(len(models)):
-        t.add_column(Column(name='cflux %s' % models[i], data=output[:,4+len(models)+i]))
-  
-    header = fits.Header()
-    header['AV'] = A_v
-    header['SFR'] = sfr
-    header['APPERA'] = apera
-    header['MAXAGE'] = maxage
-    header['DIST'] = distance
+        t.add_column(Column(name='c%s' % models[i], data=output[:,4+len(models)+i]))
+    # head table
+    header = Table()
+    header.add_column(Column(name='AV', data = [A_v]))
+    header.add_column(Column(name='SFR', data = [starformationhistory.pdf()(starformationhistory._lowerbound)]))
+    header.add_column(Column(name='APPERA', data = [apera])  )   
+    header.add_column(Column(name='MAXAGE', data = [maxage]))
+    header.add_column(Column(name='DIST', data = [distance]))
 
-    fits.writeto('out/%s' % appendix, np.array(t), header, clobber=True)
+
+    fits.writeto('out/%s' % appendix, np.array(t), clobber=True)
+    fits.append('out/%s' % appendix, np.array(header), clobber=True)
 
 
     ## creating the settings file

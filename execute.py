@@ -75,7 +75,7 @@ to be expected.
 # setting up model data
     aperas = np.logspace(2, 5, 4)
     avs = np.linspace(10.0, 50.0, 5)
-    l = 0.
+    l = 1
     mpold, tmpnew = 0., time()
     parameters = []
     for i in range(len(avs)):

@@ -55,8 +55,8 @@ The first line of the file is an ','-seperated head of the contained information
             data = hdulist[1].data
 
       #calculating magnitudes from fluxes and converting to CMD-data
-            x = -2.5*(np.log10(data['cflux %s' % color1]/64130) - np.log10(data['cflux %s' % color2]/7140))
-            y = -2.5*(np.log10(data['cflux %s' % color2]/7140))
+            x = -2.5*(np.log10(data['c%s' % color1]/64130) - np.log10(data['c%s' % color2]/7140))
+            y = -2.5*(np.log10(data['c%s' % color2]/7140))
 
             n = sum(np.logical_and( (y > -10./3. * (x-1.) + 10.), np.logical_and(max_mag < y, y < min_mag)))
             tmp, av, apera, age = fil.split('_')
