@@ -94,7 +94,7 @@ to be expected.
     print(t2, t1, t2-t1)
     
     print ('number of simulations run: %s' %l , file=output_stream)  
-    head = ['AV', 'Aperature_size', 'Age']
+    head = ['#','AV', 'Aperature_size', 'Age']
     f = open('out/__head', 'w')
     f.write( ','.join(head)+'\n' )
     np.savetxt(f, parameters)
