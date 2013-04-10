@@ -66,7 +66,11 @@ to be expected.
         return sfr
     g = np.vectorize(g)
     ages = np.logspace(5,7,7)
-    sf = [dist.distribution(g, 1000., ages[i]) for i in range(len(ages))]
+    #sf = [dist.distribution(g, 1000., ages[i]) for i in range(len(ages))]
+    sf = []
+    for i in range(len(ages)):
+        sfr = 150000*mf.mean()/(ages[i]-1000.)           # using sfr so that we expect ~150000 stars
+        sf.append( dist.distribution(g, 1000., ages[i]))
 
     t1 = time()                 # finished reading the distributions
     print(t1,file=output_stream)

@@ -85,7 +85,7 @@ returns a fits file in the out-folder, either using the appendix as filename or 
         def g(x):
             return sfr
         g = np.vectorize(g)
-        starformationhistory = dist.distribution(g, 10000., maxage)
+        starformationhistory = dist.distribution(g, 1000., maxage)
 
 
     
