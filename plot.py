@@ -87,7 +87,7 @@ of the data in 'out/__expected_number'
 
 
 
-def cmd(folder, av, apera, age, color1 = "I4", color2 = "M1"):
+def cmd(folder, av, apera, age, color1 = "I4", color2 = "M1", corrected=True, old=False, color='mass'):
     '''cmd(folder, av, apera, age, color1 = "I4", color2 = "M1") - creates a CMD
 
 Parameters
@@ -113,14 +113,27 @@ using the `color1-color2` vs `color2`
  
     hdulist = fits.open('%s/%s' %(folder,'sim_%03d_%06d_%09d'%(av,apera,age)))
     data = hdulist[1].data
-  
-    x = -2.5*(np.log10(data['c%s' % color1]/64130) - np.log10(data['c%s' % color2]/7140))
-    y = -2.5*(np.log10(data['c%s' % color2]/7140))
+    z = data[color]
+    
 
+    if old:
+        x = -2.5*(np.log10(data['cflux %s' % color1]/64130) - np.log10(data['cflux %s' % color2]/7140))
+        y = -2.5*(np.log10(data['cflux %s' % color2]/7140))
+    else:
+        if corrected:
+            x = -2.5*(np.log10(data['c%s' % color1]/64130) - np.log10(data['c%s' % color2]/7140))
+            y = -2.5*(np.log10(data['c%s' % color2]/7140))
+        else:
+            x = -2.5*(np.log10(data['%s' % color1]/64130) - np.log10(data['%s' % color2]/7140))
+            y = -2.5*(np.log10(data['%s' % color2]/7140))
+        
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter(x,y)
+    scat = ax.scatter(x,y, c=z)
+    cb = fig.colorbar(scat)
+    cb.set_label('log(%s)' % color)
     ax.plot([1., 4. ], [10., 0.])
+    ax.plot([-1., 8.],[13., 4.])
     ax.plot([xmin, xmax],[selectmin, selectmin])
     ax.plot([xmin, xmax],[selectmax, selectmax])
 
@@ -249,7 +262,7 @@ def histogram(folder, av, apera, age, color1 = "I4", color2 = "M1"):
     pdf, bins, patches = ax.hist(dat, range=(-.5,1.5))
     #ax.set_yscale('log')
 
-
+    plt.savefig('plot/hist.png')
 
 
 

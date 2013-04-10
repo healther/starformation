@@ -61,6 +61,7 @@ The first line of the file is an ','-seperated head of the contained information
 
             
             sel = np.logical_and( (y > -10./3. * (x-1.) + 10.), np.logical_and(max_mag < y, y < min_mag))
+            sel = np.logical_and(sel, y < -x + 12.)
             n = sum(sel)
             t = Table(hdulist[1].data)
             if 'sel' in t.columns:
