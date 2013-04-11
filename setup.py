@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from StringIO import StringIO
 import urllib2
 import os
-from StringIO import StringIO
 import sys
 import tarfile
 
 
 
 def main(quiet=False):
-    '''main(quiet=False)
+    """main(quiet=False)
 
-Pulling all necessary files for using the starformation script
+    Pulling all necessary files for using the starformation script
 
-This script pulls the fits-files for the radiation models from the MPIA-folder of Thomas
-Robitaille, if the files have been moved feel free to contact robitaille@mpia.de
+    This script pulls the fits-files for the radiation models from the MPIA-folder of Thomas
+    Robitaille, if the files have been moved feel free to contact robitaille@mpia.de
 
-It also pulls the extinction law from 
-http://caravan.astro.wisc.edu/protostars/info.php?topic=sedfitter_results 
-if you have problems with them please contact
-http://caravan.astro.wisc.edu/protostars/contact.php
+    It also pulls the extinction law from 
+    http://caravan.astro.wisc.edu/protostars/info.php?topic=sedfitter_results 
+    if you have problems with them please contact
+    http://caravan.astro.wisc.edu/protostars/contact.php
 
-Parameter
----------
-quiet  boolean  if true suppresses all standard output
-'''
+    Parameter
+    ---------
+    quiet  boolean:
+        if true suppresses all standard output
+    """
     if quiet:
         output_stream = StringIO()
     else:

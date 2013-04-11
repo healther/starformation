@@ -1,38 +1,43 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 from StringIO import StringIO
-import sys
 from time import time
-import distribution as dist
-import starformation
-import analysis
+import sys
+
 import numpy as np
 from astropy.io import fits
 
+import distribution as dist
+import starformation
+import analysis
+import functions
+
 
 def main(n = 150000, quiet = False):
-    '''main(n = 150000, quiet = False)
+    """main(n = 150000, quiet = False)
 
-This script produces a grid of expected numbers of stars according to the selection 
-    criteria of Yusef-Zedah et al. 2009, 702,178-225 The Astrophysical Journal.
-    The grid is in av for visual extinction, apera for aperature size and age for the maxage 
-    of the starformation size
+    This script produces a grid of expected numbers of stars according to the selection 
+        criteria of Yusef-Zedah et al. 2009, 702,178-225 The Astrophysical Journal.
+        The grid is in av for visual extinction, apera for aperature size and age for the maxage 
+        of the starformation size
 
-Parameters
-----------
-n       integer  number of stars to be sampled per parameter set
-quiet   boolean  if true suppresses all standard output
+    Parameters
+    ----------
+    n       integer:
+        number of stars to be sampled per parameter set
+    quiet   boolean:
+        if true suppresses all standard output
 
 
-Returns
-----------
-A number of fits-files with the sampled stars for different parameters to be specified in
-this file.
-Standard output is used to report progress, it will print out the parameter set to be 
-progressed next and the completeness of the script as
-AV aperaturesize maxage completeness ETA
-ETA is the time to complete in seconds based on the single last operation
-'''
+    Returns
+    ----------
+    A number of fits-files with the sampled stars for different parameters to be specified in
+    this file.
+    Standard output is used to report progress, it will print out the parameter set to be 
+    progressed next and the completeness of the script as
+    AV aperaturesize maxage completeness ETA
+    ETA is the time to complete in seconds based on the single last operation
+    """
     t0 = time()         #timing possibility
 
     if quiet:
@@ -46,35 +51,21 @@ ETA is the time to complete in seconds based on the single last operation
 
     sfr = .01
     # star mass function
-    def f(x):               # Kouper IMF
-    #http://adsabs.harvard.edu/abs/2001MNRAS.322..231K
-        if x<.01:
-            return 0
-        elif x < .08:
-            return 62.46192*x**-.3
-        elif x < .5:
-            return 1.413352*x**-1.8
-        elif x < 1.:
-            return x**-2.3          # also value 2.7 given eq.(6) or eq (2)
-        else:
-            return x**-2.3
-    f = np.vectorize(f)
-    mf = dist.distribution(f, .1, 50.)
+    kroupa = np.vectorize(functions.kroupa)
+    mf = dist.Distribution(kroupa, .1, 50.)
 
     #star formation history
-    def g(x):
-        return 1
-    g = np.vectorize(g)
+    constant_sfr = np.vectorize(functions.constant_sfr)
     
     ages = np.logspace(5,7,7)
-    sf = [dist.distribution(g, 1000., ages[i]) for i in range(len(ages))]
+    sf = [dist.Distribution(constant_sfr, 1000., ages[i]) for i in range(len(ages))]
     #sfr = [150000*mf.mean()/(ages[i]-1000.) for i in range(len(ages))]
 
     t1 = time()                 # finished reading the distributions
     print(t1,file=output_stream)
 
 
-# setting up model data
+    # setting up model data
     aperas = np.logspace(2, 5, 4)
     avs = np.linspace(10.0, 50.0, 5)
     l = 1

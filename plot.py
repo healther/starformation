@@ -1,47 +1,42 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
+
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.mlab import griddata
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy.io import fits
 
 
-def main(aperature = 1, visual_ex = 0, age=0, bapera=True, bav=True, bage=True):
-    '''main(aperature = 1, visual_ex = 0, age=0, bapera=True, bav=True, bage=True)
+import zero
 
-Parameters
-----------
-aperature  int    defines for which aperature the AV-age-sfr plot is taken
-visual_ex  int    defines for which AV the age-aperature-sfr plot is taken
-age        int    defines for which age the av-aperature-sfr plot is taken
-bapera     bool   if false surpresses the av-age plot
-bav        bool   if false surpresses the age-aperture plot
-bage       bool   if false surpresses the av-aperture plot
 
-Returns
-----------
-A 3d-surface-plot at `the aperature+1`th aperature and a plot at the `visual_ex+1`th AV value
-of the data in 'out/__expected_number'
-'''
+def main(aperture = 1, visual_ex = 0, age=0, bapera=True, bav=True, bage=True):
+    """main(aperture = 1, visual_ex = 0, age=0, bapera=True, bav=True, bage=True)
 
-    #f = open('out/__head', 'r')
-    #headers = f.readline().strip().split(',')[1:]
-    #data = np.loadtxt(f)
-    #f.close()
-    #avs = np.unique(data[:,headers.index('AV')])
-    #aperas = np.unique(data[:,headers.index('Aperature_size')])
-    #ages = np.unique(data[:,headers.index('Age')])
-    
-    #hdulist = fits.open('%s/%s' %('out','sim_%03d_%06d_%09d'%(avs[0],aperas[0],ages[0])))
-    #sfr = hdulist[2].data['SFR'][0]
+    Parameters
+    ----------
+    aperture  int:
+        defines for which aperture the AV-age-sfr plot is taken
+    visual_ex  int:
+        defines for which AV the age-aperture-sfr plot is taken
+    age        int:
+        defines for which age the av-aperture-sfr plot is taken
+    bapera     bool:
+        if false surpresses the av-age plot
+    bav        bool:
+        if false surpresses the age-aperture plot
+    bage       bool:
+        if false surpresses the av-aperture plot
 
-    #f = open('out/__expected_number', 'r')
-    #headers = f.readline().strip().split(',')[1:]
-    #data = np.loadtxt(f)
-    #f.close()
+    Returns
+    ----------
+    A 3d-surface-plot at `the aperture+1`th aperture and a plot at the `visual_ex+1`th AV value
+    of the data in 'out/__expected_number'
+    """
+
     avs, aperas, ages, sfr, headers, data = init()
 
     numbers = np.clip(data[:,3].reshape(len(avs), len(aperas), len(ages)),1.,1000000.) #prevent inf if no stars are detected
@@ -50,7 +45,7 @@ of the data in 'out/__expected_number'
         ax = fig.gca(projection='3d')
         ax.view_init(45,135)
         X, Y = np.meshgrid(avs, np.log10(ages))
-        Z = 559.*sfr/np.transpose(numbers[:,aperature,:])
+        Z = 559.*sfr/np.transpose(numbers[:,aperture,:])
         surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm)
         cbar = fig.colorbar(surf)
         cbar.set_label('starformation rate in M_sun/year')
@@ -63,7 +58,7 @@ of the data in 'out/__expected_number'
         ax.set_xlabel('av')
         ax.set_ylabel('log(age)')
         ax.set_zlabel('starformation rate in M_sun/year')
-        ax.set_title('Starformation as a function of\n visual extinction Av and age at apperaturesize=%s' % aperas[aperature])
+        ax.set_title('Starformation as a function of\n visual extinction Av and age at apperaturesize=%s' % aperas[aperture])
 
         plt.savefig('plot/3dav-age.svg')
 
@@ -115,22 +110,28 @@ of the data in 'out/__expected_number'
 
 
 def cmd(folder, av, apera, age, color1 = "I4", color2 = "M1", corrected=True, old=False, color='mass'):
-    '''cmd(folder, av, apera, age, color1 = "I4", color2 = "M1") - creates a CMD
+    """cmd(folder, av, apera, age, color1 = "I4", color2 = "M1") - creates a CMD
 
-Parameters
-----------
-folder   String  folder in which the datafile is to be found
-av       float   value for the visual extinction as in the filename
-apera    float   value of the aperture size as in the filename 
-age      float   value of the age as in the filename
-color1   String  band filter to be used for the first color 
-color2   String  band filter to be used for the second color
+    Parameters
+    ----------
+    folder   String:
+        folder in which the datafile is to be found
+    av       float:
+        value for the visual extinction as in the filename
+    apera    float:
+        value of the aperture size as in the filename 
+    age      float:
+        value of the age as in the filename
+    color1   String:
+        band filter to be used for the first color 
+    color2   String:
+        band filter to be used for the second color
 
-Returns
-----------
-A color-magnitude-diagram of the data in the 'folder/sim_av_apera_age' fits-file 
-using the `color1-color2` vs `color2`
-'''
+    Returns
+    ----------
+    A color-magnitude-diagram of the data in the 'folder/sim_av_apera_age' fits-file 
+    using the `color1-color2` vs `color2`
+    """
     xmin = -1.
     xmax = 8.
     ymin = 15.
@@ -144,15 +145,15 @@ using the `color1-color2` vs `color2`
     
 
     if old:
-        x = -2.5*(np.log10(data['cflux %s' % color1]/64130) - np.log10(data['cflux %s' % color2]/7140))
-        y = -2.5*(np.log10(data['cflux %s' % color2]/7140))
+        x = -2.5*(np.log10(data['cflux %s' % color1]/zero.zero_mag[color1]) - np.log10(data['cflux %s' % color2]/zero.zero_mag[color2]))
+        y = -2.5*(np.log10(data['cflux %s' % color2]/zero.zero_mag[color2]))
     else:
         if corrected:
-            x = -2.5*(np.log10(data['c%s' % color1]/64130) - np.log10(data['c%s' % color2]/7140))
-            y = -2.5*(np.log10(data['c%s' % color2]/7140))
+            x = -2.5*(np.log10(data['c%s' % color1]/zero.zero_mag[color1]) - np.log10(data['c%s' % color2]/zero.zero_mag[color2]))
+            y = -2.5*(np.log10(data['c%s' % color2]/zero.zero_mag[color2]))
         else:
-            x = -2.5*(np.log10(data['%s' % color1]/64130) - np.log10(data['%s' % color2]/7140))
-            y = -2.5*(np.log10(data['%s' % color2]/7140))
+            x = -2.5*(np.log10(data['%s' % color1]/zero.zero_mag[color1]) - np.log10(data['%s' % color2]/zero.zero_mag[color2]))
+            y = -2.5*(np.log10(data['%s' % color2]/zero.zero_mag[color2]))
         
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -170,26 +171,32 @@ using the `color1-color2` vs `color2`
     ax.set_ylim(ymin, ymax)
     ax.set_title('cmd plot for %s_%s_%s' %(av,apera,age))
 
-    plt.savefig('plot/%s_%s_%s.png' %(av,apera,age))
+    plt.savefig('plot/%s_%s_%s_%s.png' %(av,apera,age,color))
 
 
-def plot_2d(aperature = 1, visual_ex = 0, age = 0, bapera=True, bav=True, bage=True):
-    '''plot_2d(aperature = 1, visual_ex = 0, age = 0, bapera=True, bav=True, bage=True) - creates two 2d contour plots
+def plot_2d(aperture = 1, visual_ex = 0, age = 0, bapera=True, bav=True, bage=True):
+    """plot_2d(aperture = 1, visual_ex = 0, age = 0, bapera=True, bav=True, bage=True) - creates two 2d contour plots
 
-Parameters
-----------
-aperature  int    defines for which aperature the AV-age-sfr plot is take
-visual_ex  int    defines for which AV the age-aperature-sfr plot is take
-age        int    defines for which age the av-aperature-sfr plot is taken
-bapera     bool   if false surpresses the av-age plot
-bav        bool   if false surpresses the age-aperture plot
-bage       bool   if false surpresses the av-aperture plot
+    Parameters
+    ----------
+    aperture  int:
+        defines for which aperture the AV-age-sfr plot is take
+    visual_ex  int:
+        defines for which AV the age-aperture-sfr plot is take
+    age        int:
+        defines for which age the av-aperture-sfr plot is taken
+    bapera     bool:
+        if false surpresses the av-age plot
+    bav        bool:
+        if false surpresses the age-aperture plot
+    bage       bool:
+        if false surpresses the av-aperture plot
 
-Returns
-----------
-A plot at `the aperature+1`th aperature and a plot at the `visual_ex+1`th AV value
-of the data in 'out/__expected_number'
-'''
+    Returns
+    ----------
+    A plot at `the aperture+1`th aperture and a plot at the `visual_ex+1`th AV value
+    of the data in 'out/__expected_number'
+    """
 
     avs, aperas, ages, sfr, headers, data = init()
 
@@ -197,7 +204,7 @@ of the data in 'out/__expected_number'
 
     if bapera:
         X, Y = np.meshgrid(avs, np.log10(ages))
-        Z = 559.*sfr/np.transpose(numbers[:,aperature,:])
+        Z = 559.*sfr/np.transpose(numbers[:,aperture,:])
       
         x = X.reshape(numbers.shape[0]*numbers.shape[2])
         y = Y.reshape(numbers.shape[0]*numbers.shape[2])
@@ -216,9 +223,9 @@ of the data in 'out/__expected_number'
         ax.set_xlabel('av')
         ax.set_ylabel('log(age)')
         cbar.set_label('starformation rate in M_sun/year')
-        ax.set_title('Starformation as a function of visual extinction Av\nand age at apperaturesize=%s' % aperas[aperature])
+        ax.set_title('Starformation as a function of visual extinction Av\nand age at apperaturesize=%s' % aperas[aperture])
 
-        plt.savefig('plot/2dav-age-%s.png' % aperas[aperature])
+        plt.savefig('plot/2dav-age-%s.png' % aperas[aperture])
 
     if bav:
         fig2 = plt.figure()
@@ -265,9 +272,9 @@ of the data in 'out/__expected_number'
         plt.savefig('plot/2dav-apera-%s.png' % ages[age])
 
 def init():
-    '''init() - aquires the base data
+    """init() - aquires the base data
 
-'''
+    """
     f = open('out/__head', 'r')
     headers = f.readline().strip().split(',')[1:]
     data = np.loadtxt(f)
@@ -288,20 +295,24 @@ def init():
 
 
 def histogram(folder, av, apera, age):
-    '''histogram(folder, av, apera, age, color1 = "I4", color2 = "M1")
+    """histogram(folder, av, apera, age, color1 = "I4", color2 = "M1")
 
-Parameters
-----------
-folder   String  folder in which the datafile is to be found
-av       float   value for the visual extinction as in the filename
-apera    float   value of the aperture size as in the filename 
-age      float   value of the age as in the filename
+    Parameters
+    ----------
+    folder   String:
+        folder in which the datafile is to be found
+    av       float:
+        value for the visual extinction as in the filename
+    apera    float:
+        value of the aperture size as in the filename 
+    age      float:
+        value of the age as in the filename
 
-Returns
-----------
-A histogram of the massdistribution in logspace with 20 bins from -.5 to 1.5 M_sun
-of all the sampled stars and restricted to the selected stars 
-'''
+    Returns
+    ----------
+    A histogram of the massdistribution in logspace with 20 bins from -.5 to 1.5 M_sun
+    of all the sampled stars and restricted to the selected stars 
+    """
     
     hdulist = fits.open('%s/%s' %(folder,'sim_%03d_%06d_%09d'%(av,apera,age)))
     data = hdulist[1].data
