@@ -163,7 +163,7 @@ using the `color1-color2` vs `color2`
     ax.set_ylabel(color2)
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
-    ax.set_title('%s_%s_%s.svg' %(av,apera,age))
+    ax.set_title('cmd plot for %s_%s_%s' %(av,apera,age))
 
     plt.savefig('plot/%s_%s_%s.png' %(av,apera,age))
 

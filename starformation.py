@@ -20,17 +20,19 @@ Creates a sample of stars
 
 Parameters
 ----------
-massfunction            distribution
-starformation history   distribution
+massfunction            distribution, relatively in mass
+starformation history   distribution, relatively in age
 A_v       float     value for the visual extinction 
-sfr       float     Star formation rate in M_sun/year, is assumed to be constant over maxage
+sfr       float     average star formation rate in M_sun/year (only if precise = True)
 apera     float     used aperature size for selecting the fluxes of the protostars
 maxage    float     age of the star formation site, sfr is assumed to be constant
 distance  float     distance to the simulated starformation site
 appendix  String    sets the outputfilename, default is the starting time (via time.time())
 quiet     boolean   if true (=1) suppresses all standard output
-precise   boolean   if true (=1) sample single star till expected mass reached, else calculate
-                    expected number and sample as an array
+precise   boolean   if true (=1) sample single star till expected mass reached based on the 
+                    integrated starformationhistory times the starformationrate
+                    else sfr is the number of expected stars and the starformationrate is
+                    calculated by the cumulated mass divided by the formation time
 
 The distributions must provide an object which has the following members:
     float    cdf(float x)   returns the integrated distribution up to x, is used to calculate
@@ -83,14 +85,13 @@ returns a fits file in the out-folder, either using the appendix as filename or 
 
         # star formation history
         def g(x):
-            return sfr
+            return 1.
         g = np.vectorize(g)
         starformationhistory = dist.distribution(g, 1000., maxage)
 
 
-    
     cumass = 0.                                              #sampled mass
-    exmass = starformationhistory.cdf()(starformationhistory._upperbound)      #expected mass formed
+    exmass = starformationhistory.cdf()(starformationhistory._upperbound)*sfr     #expected mass formed
     stars = []                                               #storing for the sample
     n = 0
 
@@ -105,10 +106,12 @@ returns a fits file in the out-folder, either using the appendix as filename or 
                 print (n, cumass, file=output_stream)                                 #reporting progress
             n = n+1
     else:
-        n = int(exmass/ massfunction.mean())               
+        n = int(exmass/ massfunction.mean())
+        n = sfr
         mass, age = massfunction.sample(n), starformationhistory.sample(n)
         cumass = np.sum(mass)
         stars = [[i, age[i], mass[i]] for i in range(n)]
+    sfr = cumass/(starformationhistory._upperbound-starformationhistory._lowerbound)
 
     print ('number of sampled stars: %s' %n , file=output_stream)  
     print ('mass of sampled stars: %s' % cumass , file=output_stream)  
@@ -192,7 +195,7 @@ returns a fits file in the out-folder, either using the appendix as filename or 
     # head table
     header = Table()
     header.add_column(Column(name='AV', data = [A_v]))
-    header.add_column(Column(name='SFR', data = [starformationhistory.pdf()(starformationhistory._lowerbound)]))
+    header.add_column(Column(name='SFR', data = [sfr]))
     header.add_column(Column(name='APPERA', data = [apera])  )   
     header.add_column(Column(name='MAXAGE', data = [maxage]))
     header.add_column(Column(name='DIST', data = [distance]))
