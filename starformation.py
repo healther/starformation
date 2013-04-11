@@ -91,13 +91,13 @@ returns a fits file in the out-folder, either using the appendix as filename or 
 
 
     cumass = 0.                                              #sampled mass
-    exmass = starformationhistory.cdf()(starformationhistory._upperbound)*sfr     #expected mass formed
     stars = []                                               #storing for the sample
-    n = 0
 
     t1 = time()                     # startup completed
 
     if precise == True:
+        n = 0
+        exmass = starformationhistory.cdf()(starformationhistory._upperbound)*sfr     #expected mass formed
         while cumass < exmass:
             mass, age = massfunction.sample(1)[0], starformationhistory.sample(1)[0]
             cumass = cumass + mass
@@ -106,12 +106,11 @@ returns a fits file in the out-folder, either using the appendix as filename or 
                 print (n, cumass, file=output_stream)                                 #reporting progress
             n = n+1
     else:
-        n = int(exmass/ massfunction.mean())
         n = sfr
         mass, age = massfunction.sample(n), starformationhistory.sample(n)
         cumass = np.sum(mass)
         stars = [[i, age[i], mass[i]] for i in range(n)]
-    sfr = cumass/(starformationhistory._upperbound-starformationhistory._lowerbound)
+    sfr = cumass/(starformationhistory._upperbound-starformationhistory._lowerbound)  #average star formation rate
 
     print ('number of sampled stars: %s' %n , file=output_stream)  
     print ('mass of sampled stars: %s' % cumass , file=output_stream)  

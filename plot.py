@@ -9,13 +9,17 @@ import numpy as np
 from astropy.io import fits
 
 
-def main(aperature = 1, visual_ex = 0, age=0):
-    '''main(aperature = 1, visual_ex = 0)
+def main(aperature = 1, visual_ex = 0, age=0, bapera=True, bav=True, bage=True):
+    '''main(aperature = 1, visual_ex = 0, age=0, bapera=True, bav=True, bage=True)
 
 Parameters
 ----------
-aperature  int    defines for which aperature the AV-age-sfr plot is take
-visual_ex  int    defines for which AV the age-aperature-sfr plot is take
+aperature  int    defines for which aperature the AV-age-sfr plot is taken
+visual_ex  int    defines for which AV the age-aperature-sfr plot is taken
+age        int    defines for which age the av-aperature-sfr plot is taken
+bapera     bool   if false surpresses the av-age plot
+bav        bool   if false surpresses the age-aperture plot
+bage       bool   if false surpresses the av-aperture plot
 
 Returns
 ----------
@@ -41,70 +45,71 @@ of the data in 'out/__expected_number'
     avs, aperas, ages, sfr, headers, data = init()
 
     numbers = np.clip(data[:,3].reshape(len(avs), len(aperas), len(ages)),1.,1000000.) #prevent inf if no stars are detected
+    if bapera:
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        ax.view_init(45,135)
+        X, Y = np.meshgrid(avs, np.log10(ages))
+        Z = 559.*sfr/np.transpose(numbers[:,aperature,:])
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm)
+        cbar = fig.colorbar(surf)
+        cbar.set_label('starformation rate in M_sun/year')
 
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.view_init(45,135)
-    X, Y = np.meshgrid(avs, np.log10(ages))
-    Z = 559.*sfr/np.transpose(numbers[:,aperature,:])
-    surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm)
-    cbar = fig.colorbar(surf)
-    cbar.set_label('starformation rate in M_sun/year')
+        x = X.reshape(numbers.shape[0]*numbers.shape[2])
+        y = Y.reshape(numbers.shape[0]*numbers.shape[2])
+        z = Z.reshape(numbers.shape[0]*numbers.shape[2])
 
-    x = X.reshape(numbers.shape[0]*numbers.shape[2])
-    y = Y.reshape(numbers.shape[0]*numbers.shape[2])
-    z = Z.reshape(numbers.shape[0]*numbers.shape[2])
+        ax.scatter(x,y,z)
+        ax.set_xlabel('av')
+        ax.set_ylabel('log(age)')
+        ax.set_zlabel('starformation rate in M_sun/year')
+        ax.set_title('Starformation as a function of\n visual extinction Av and age at apperaturesize=%s' % aperas[aperature])
 
-    ax.scatter(x,y,z)
-    ax.set_xlabel('av')
-    ax.set_ylabel('log(age)')
-    ax.set_zlabel('starformation rate in M_sun/year')
-    ax.set_title('Starformation as a function of\n visual extinction Av and age at apperaturesize=%s' % aperas[aperature])
+        plt.savefig('plot/3dav-age.svg')
 
-    plt.savefig('plot/3dav-age.svg')
+    if bav:
+        fig2 = plt.figure()
+        ax2 = fig2.gca(projection='3d')
+        ax2.view_init(45,45)
 
-    fig2 = plt.figure()
-    ax2 = fig2.gca(projection='3d')
-    ax2.view_init(45,45)
+        X2, Y2 = np.meshgrid(np.log10(ages), np.log10(aperas))
+        Z2 = 559.*sfr/numbers[visual_ex,:,:]
+        surf2 = ax2.plot_surface(X2, Y2, Z2, rstride=1, cstride=1, cmap=cm.coolwarm)
+        cbar2 = fig2.colorbar(surf2)
+        cbar2.set_label('starformation rate in M_sun/year')
 
-    X2, Y2 = np.meshgrid(np.log10(ages), np.log10(aperas))
-    Z2 = 559.*sfr/numbers[visual_ex,:,:]
-    surf2 = ax2.plot_surface(X2, Y2, Z2, rstride=1, cstride=1, cmap=cm.coolwarm)
-    cbar2 = fig2.colorbar(surf2)
-    cbar2.set_label('starformation rate in M_sun/year')
+        x2 = np.log10(data[:,2].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
+        y2 = np.log10(data[:,1].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
+        z2 = 559.*sfr/data[:,3].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2])
+        ax2.scatter(x2,y2,z2)
+        ax2.set_xlabel('log(age)')
+        ax2.set_ylabel('log(apera)')
+        ax2.set_zlabel('starformation rate in M_sun/year')
+        ax2.set_title('Starformation as a function of\napperaturesize and age at Av=%s' % avs[visual_ex])
 
-    x2 = np.log10(data[:,2].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
-    y2 = np.log10(data[:,1].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
-    z2 = 559.*sfr/data[:,3].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2])
-    ax2.scatter(x2,y2,z2)
-    ax2.set_xlabel('log(age)')
-    ax2.set_ylabel('log(apera)')
-    ax2.set_zlabel('starformation rate in M_sun/year')
-    ax2.set_title('Starformation as a function of\napperaturesize and age at Av=%s' % avs[visual_ex])
+        plt.savefig('plot/3dage-apera.png')
 
-    plt.savefig('plot/3dage-apera.png')
+    if bage:
+        fig3 = plt.figure()
+        ax3 = fig3.gca(projection='3d')
+        ax3.view_init(45,-135)
 
+        X3, Y3 = np.meshgrid(np.log10(aperas), avs)
+        Z3 = 559.*sfr/numbers[:,:,age]
+        surf3 = ax3.plot_surface(X3, Y3, Z3, rstride=1, cstride=1, cmap=cm.coolwarm)
+        cbar3 = fig3.colorbar(surf3)
+        cbar3.set_label('starformation rate in M_sun/year')
 
-    fig3 = plt.figure()
-    ax3 = fig3.gca(projection='3d')
-    ax3.view_init(45,-135)
+        x3 = X3.reshape(numbers.shape[0]*numbers.shape[1])
+        y3 = Y3.reshape(numbers.shape[0]*numbers.shape[1])
+        z3 = Z3.reshape(numbers.shape[0]*numbers.shape[1])   
+        ax3.scatter(x3,y3,z3)
+        ax3.set_xlabel('log(apera)')
+        ax3.set_ylabel('AV')
+        ax3.set_zlabel('starformation rate in M_sun/year')
+        ax3.set_title('Starformation as a function of\napperaturesize and AV at age=%s years' % ages[age])
 
-    X3, Y3 = np.meshgrid(np.log10(aperas), avs)
-    Z3 = 559.*sfr/numbers[:,:,age]
-    surf3 = ax3.plot_surface(X3, Y3, Z3, rstride=1, cstride=1, cmap=cm.coolwarm)
-    cbar3 = fig3.colorbar(surf3)
-    cbar3.set_label('starformation rate in M_sun/year')
-
-    x3 = X3.reshape(numbers.shape[0]*numbers.shape[1])
-    y3 = Y3.reshape(numbers.shape[0]*numbers.shape[1])
-    z3 = Z3.reshape(numbers.shape[0]*numbers.shape[1])   
-    ax3.scatter(x3,y3,z3)
-    ax3.set_xlabel('log(apera)')
-    ax3.set_ylabel('AV')
-    ax3.set_zlabel('starformation rate in M_sun/year')
-    ax3.set_title('Starformation as a function of\napperaturesize and AV at age=%s years' % ages[age])
-
-    plt.savefig('plot/3dav-apera.png')
+        plt.savefig('plot/3dav-apera.png')
 
 
 
@@ -168,13 +173,17 @@ using the `color1-color2` vs `color2`
     plt.savefig('plot/%s_%s_%s.png' %(av,apera,age))
 
 
-def plot_2d(aperature = 1, visual_ex = 0, age = 0):
-    '''plot_2d(aperature = 1, visual_ex = 0) - creates two 2d contour plots
+def plot_2d(aperature = 1, visual_ex = 0, age = 0, bapera=True, bav=True, bage=True):
+    '''plot_2d(aperature = 1, visual_ex = 0, age = 0, bapera=True, bav=True, bage=True) - creates two 2d contour plots
 
 Parameters
 ----------
 aperature  int    defines for which aperature the AV-age-sfr plot is take
 visual_ex  int    defines for which AV the age-aperature-sfr plot is take
+age        int    defines for which age the av-aperature-sfr plot is taken
+bapera     bool   if false surpresses the av-age plot
+bav        bool   if false surpresses the age-aperture plot
+bage       bool   if false surpresses the av-aperture plot
 
 Returns
 ----------
@@ -186,72 +195,74 @@ of the data in 'out/__expected_number'
 
     numbers = np.clip(data[:,3].reshape(len(avs), len(aperas), len(ages)),1.,1000000.) #prevent inf if no stars are detected
 
-    X, Y = np.meshgrid(avs, np.log10(ages))
-    Z = 559.*sfr/np.transpose(numbers[:,aperature,:])
-   
-    x = X.reshape(numbers.shape[0]*numbers.shape[2])
-    y = Y.reshape(numbers.shape[0]*numbers.shape[2])
-    z = Z.reshape(numbers.shape[0]*numbers.shape[2])
+    if bapera:
+        X, Y = np.meshgrid(avs, np.log10(ages))
+        Z = 559.*sfr/np.transpose(numbers[:,aperature,:])
+      
+        x = X.reshape(numbers.shape[0]*numbers.shape[2])
+        y = Y.reshape(numbers.shape[0]*numbers.shape[2])
+        z = Z.reshape(numbers.shape[0]*numbers.shape[2])
 
-    fig = plt.figure()
-    ax = fig.gca()
+        fig = plt.figure()
+        ax = fig.gca()
 
-    cs = ax.contourf(X,Y,Z)
-    #cs1 = ax.contour(X,Y,Z,[0.01,.011,.012,.013,.014,.015],colors=['red','red','red','red','red','red'])
-    cs1 = ax.contour(X,Y,Z,levels=[0.1,.125,.15,.175,.2], colors=['red','red','red','red','red'])
-    ax.clabel(cs1, fontsize=10, inline=1)
-    cbar = plt.colorbar(cs)
- 
-    ax.scatter(x,y)
-    ax.set_xlabel('av')
-    ax.set_ylabel('log(age)')
-    cbar.set_label('starformation rate in M_sun/year')
-    ax.set_title('Starformation as a function of visual extinction Av\nand age at apperaturesize=%s' % aperas[aperature])
+        cs = ax.contourf(X,Y,Z)
+        #cs1 = ax.contour(X,Y,Z,[0.01,.011,.012,.013,.014,.015],colors=['red','red','red','red','red','red'])
+        cs1 = ax.contour(X,Y,Z,levels=[0.1,.125,.15,.175,.2,.225,.25,.275,.3,.325,.35,.375,.4], colors=['red','red','red','red','red','red','red','red','red','red','red','red','red'])
+        ax.clabel(cs1, fontsize=10, inline=1)
+        cbar = plt.colorbar(cs)
+    
+        ax.scatter(x,y)
+        ax.set_xlabel('av')
+        ax.set_ylabel('log(age)')
+        cbar.set_label('starformation rate in M_sun/year')
+        ax.set_title('Starformation as a function of visual extinction Av\nand age at apperaturesize=%s' % aperas[aperature])
 
-    plt.savefig('plot/2dav-age-%s.png' % aperas[aperature])
+        plt.savefig('plot/2dav-age-%s.png' % aperas[aperature])
 
-    fig2 = plt.figure()
-    ax2 = fig2.gca()
+    if bav:
+        fig2 = plt.figure()
+        ax2 = fig2.gca()
 
-    X2, Y2 = np.meshgrid(np.log10(ages), np.log10(aperas))
-    Z2 = 559.*sfr/numbers[visual_ex,:,:]
-    cs2 = ax2.contourf(X2, Y2, Z2)
-    cs21 = ax2.contour(X2,Y2,Z2,levels=[0.1,.125,.15,.175,.2], colors=['red','red','red','red','red'])
-    ax2.clabel(cs21, fontsize=10, inline=1)
-    cbar2 = plt.colorbar(cs2)
+        X2, Y2 = np.meshgrid(np.log10(ages), np.log10(aperas))
+        Z2 = 559.*sfr/numbers[visual_ex,:,:]
+        cs2 = ax2.contourf(X2, Y2, Z2)
+        cs21 = ax2.contour(X2,Y2,Z2,levels=[0.1,.125,.15,.175,.2,.225,.25,.275,.3,.325,.35,.375,.4], colors=['red','red','red','red','red','red','red','red','red','red','red','red','red'])
+        ax2.clabel(cs21, fontsize=10, inline=1)
+        cbar2 = plt.colorbar(cs2)
 
-    x2 = np.log10(data[:,2].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
-    y2 = np.log10(data[:,1].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
-    ax2.scatter(x2,y2)
-    ax2.set_xlabel('log(age)')
-    ax2.set_ylabel('log(apera)')
-    cbar2.set_label('starformation rate in M_sun/year')
-    ax2.set_title('Starformation as a function of\n apperaturesize and age at Av=%s' % avs[visual_ex])
+        x2 = np.log10(data[:,2].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
+        y2 = np.log10(data[:,1].reshape(len(avs), len(aperas), len(ages))[visual_ex,:,:].reshape(numbers.shape[1]*numbers.shape[2]))
+        ax2.scatter(x2,y2)
+        ax2.set_xlabel('log(age)')
+        ax2.set_ylabel('log(apera)')
+        cbar2.set_label('starformation rate in M_sun/year')
+        ax2.set_title('Starformation as a function of\n apperaturesize and age at Av=%s' % avs[visual_ex])
 
-    plt.savefig('plot/2dage-apera-%s.png' % avs[visual_ex])
+        plt.savefig('plot/2dage-apera-%s.png' % avs[visual_ex])
 
+    if bage:
+        fig3 = plt.figure()
+        ax3 = fig3.gca()
 
-    fig3 = plt.figure()
-    ax3 = fig3.gca()
+        X3, Y3 = np.meshgrid(np.log10(aperas), avs)
+        Z3 = 559.*sfr/numbers[:,:,age]
+        cs3 = ax3.contourf(X3, Y3, Z3)
+        cs31 = ax3.contour(X3, Y3, Z3,levels=[0.1,.125,.15,.175,.2,.225,.25,.275,.3,.325,.35,.375,.4], colors=['red','red','red','red','red','red','red','red','red','red','red','red','red'])
+        ax3.clabel(cs31, fontsize=10, inline=1)
 
-    X3, Y3 = np.meshgrid(np.log10(aperas), avs)
-    Z3 = 559.*sfr/numbers[:,:,age]
-    cs3 = ax3.contourf(X3, Y3, Z3)
-    cs31 = ax3.contour(X3, Y3, Z3,levels=[0.1,.125,.15,.175,.2], colors=['red','red','red','red','red'])
-    ax3.clabel(cs31, fontsize=10, inline=1)
+        cbar3 = fig3.colorbar(cs3)
+        cbar3.set_label('starformation rate in M_sun/year')
 
-    cbar3 = fig3.colorbar(cs3)
-    cbar3.set_label('starformation rate in M_sun/year')
+        x3 = X3.reshape(numbers.shape[0]*numbers.shape[1])
+        y3 = Y3.reshape(numbers.shape[0]*numbers.shape[1])
+        ax3.scatter(x3,y3)
+        ax3.set_xlabel('log(apera)')
+        ax3.set_ylabel('AV')
+        ax3.set_title('Starformation as a function of\napperaturesize and AV at age=%s years' % ages[age])
+        cbar3.set_label('starformation rate in M_sun/year')
 
-    x3 = X3.reshape(numbers.shape[0]*numbers.shape[1])
-    y3 = Y3.reshape(numbers.shape[0]*numbers.shape[1])
-    ax3.scatter(x3,y3)
-    ax3.set_xlabel('log(apera)')
-    ax3.set_ylabel('AV')
-    ax3.set_title('Starformation as a function of\napperaturesize and AV at age=%s years' % ages[age])
-    cbar3.set_label('starformation rate in M_sun/year')
-
-    plt.savefig('plot/2dav-apera-%s.png' % ages[age])
+        plt.savefig('plot/2dav-apera-%s.png' % ages[age])
 
 def init():
     '''init() - aquires the base data
