@@ -77,6 +77,10 @@ class Distribution( object ):
     def sample(self, n):
         t = np.random.uniform(0,self.norm(),n)
         return self.ppf()(t)
+    
+    def sample(self):
+        t = np.random.uniform(0,self.norm())
+        return self.ppf()(t)
 
     def mean(self):                     
         return self._mean

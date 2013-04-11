@@ -85,7 +85,8 @@ def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .01, aper
         massfunction = dist.Distribution(kroupa, .1, 50.)
 
         #star formation history
-        starformationhistory = np.vectorize(functions.constant_sfr)
+        constant_sfr = np.vectorize(functions.constant_sfr)
+        starformationhistory = dist.Distribution(constant_sfr, 1000., maxage)
 
 
     cumass = 0.  #sampled mass
@@ -98,7 +99,7 @@ def main(massfunction = 0, starformationhistory = 0, A_v = 10.0, sfr = .01, aper
         n = 0
         exmass = sfh.cdf()(sfh._upperbound)*sfr     #expected mass formed
         while cumass < exmass:
-            mass, age = massfunction.sample(1)[0], sfh.sample(1)[0]
+            mass, age = massfunction.sample(), sfh.sample()
             cumass = cumass + mass
             stars.append([n, age, mass])
             if n % 10000 == 0:
