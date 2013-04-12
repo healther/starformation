@@ -75,8 +75,6 @@ def main(folder, quiet=0):
             
             hdulist[1].data = np.array(t)
             tmp, av, apera, age = fil.split('_')
-            #hdulist = fits.open('%s/%s' %(folder,fil), 'write')
-            #hdulist.writeto('%s/%s' %(folder,fil), clobber=True)
             fits.update('%s/%s' %(folder,fil), np.array(t), ext = 1, clobber=True)
             out.append([av, apera, age, n])
 
@@ -84,7 +82,9 @@ def main(folder, quiet=0):
     head = ['#', 'AV', 'Aperature_size', 'Age', 'Expected_number']
     f = open('%s/__expected_number' % folder, 'w')
     f.write(','.join(head)+'\n' )
-    np.savetxt(f, out)
+    np.savetxt(f, np.asarray(out).astype(int))
     f.close()
    
     print ("Analysed %s files and saved output to %s" % (len(out),'%s/__expected_number' % folder), file=output_stream)
+
+main('out')
