@@ -72,8 +72,10 @@ def main(quiet=False):
             f.close()
             print('Downloaded %s from %s' % (file_names[i],urls[i]), file=output_stream)
 
-    if not os.path.isfile('modesl/extinction_law.ascii')
+    if not os.path.isfile('modesl/extinction_law.ascii'):
         f = tarfile.open('models/extinction_law.tar.gz', 'r:gz')
         try: f.extractall()
         finally: f.close()
 
+if __name__ == "__main__":
+    main()
